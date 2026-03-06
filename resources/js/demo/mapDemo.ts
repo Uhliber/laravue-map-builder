@@ -1,4 +1,13 @@
 import type { MapPointer } from "@/types"
+import { PageProps } from "@/types"
+import { usePage } from "@inertiajs/vue3"
+import { computed } from "vue"
+
+const page = usePage<PageProps>()
+
+const authorUrl = computed<string>(() => {
+  return (page.props?.author_url as string) ?? "/"
+})
 
 export const demoMapBaseImage = "/images/base/base-1.jpg"
 
@@ -13,7 +22,7 @@ export const demoHighlightPointer: {
     fileType: "svg",
     title: "Welcome!",
     description:
-      "Add an interactive map to help users explore and navigate your site. Click the popover to start building.",
+      "Add an interactive map to help users explore and navigate your site. Click this popover to start building.",
     link: "/login",
     x: 0,
     y: 0,
@@ -23,8 +32,8 @@ export const demoHighlightPointer: {
     animate: false,
   },
   style: {
-    left: "-160px",
-    bottom: "-50px",
+    left: "-130px",
+    bottom: "-30px",
     width: "300px",
     height: "300px",
   },
@@ -84,6 +93,19 @@ export const demoPointers: MapPointer[] = [
     description: "Quiet resting area.",
     link: "/",
     trigger: "hover",
+    animate: true,
+  },
+  {
+    id: "ollie-stand",
+    name: "Ollie",
+    category: "other",
+    fileType: "png",
+    x: 720,
+    y: 30,
+    title: "Visit my Website!",
+    link: authorUrl.value,
+    target: "_blank",
+    trigger: "always",
     animate: true,
   },
 ]

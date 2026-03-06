@@ -36,8 +36,10 @@ onMounted(() => {
   const observer = new ResizeObserver(() => {
     isResizing.value = true
 
-    mapWidth.value = mapContainer.value!.clientWidth
-    mapHeight.value = mapContainer.value!.clientHeight
+    if (mapContainer.value) {
+      mapWidth.value = mapContainer.value.clientWidth
+      mapHeight.value = mapContainer.value.clientHeight
+    }
 
     if (resizeTimeout) clearTimeout(resizeTimeout)
 
@@ -90,12 +92,13 @@ function pointerStyle(pointer: PointerType) {
 </script>
 
 <template>
-  <div
-    ref="mapContainer"
-    class="relative w-full border rounded-lg overflow-hidden select-none"
-  >
+  <div ref="mapContainer" class="relative w-full select-none">
     <!-- Base Map -->
-    <img :src="mapImage" class="w-full h-auto block" @load="handleMapLoad" />
+    <img
+      :src="mapImage"
+      class="w-full h-auto rounded-lg border block"
+      @load="handleMapLoad"
+    />
 
     <!-- Pointer Layer -->
     <div class="absolute inset-0 pointer-events-none">

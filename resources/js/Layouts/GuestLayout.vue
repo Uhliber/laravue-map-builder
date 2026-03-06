@@ -32,7 +32,7 @@ const authorUrl = computed<string>(() => {
     </div>
 
     <div
-      class="flex justify-center mt-6 w-full overflow-hidden px-6 py-4 sm:max-w-md"
+      class="flex flex-1 justify-center items-baseline mt-6 w-full overflow-hidden px-3 py-4 sm:px-6 sm:py-4 sm:max-w-md"
     >
       <slot />
     </div>

@@ -4,6 +4,7 @@ import { MapPinPen } from "lucide-vue-next"
 import ThemeToggle from "@/components/ThemeToggle.vue"
 import { PageProps } from "@/types"
 import { computed } from "vue"
+import { useScreen } from "@/composables/useScreen"
 
 import MapBase from "@/components/MapBase.vue"
 import {
@@ -12,6 +13,7 @@ import {
   demoHighlightPointer,
 } from "@/demo/mapDemo"
 import MapPointer from "@/components/MapPointer.vue"
+import MapPointerContent from "@/components/MapPointerContent.vue"
 
 defineProps<{
   canLogin?: boolean
@@ -21,6 +23,7 @@ defineProps<{
 }>()
 
 const page = usePage<PageProps>()
+const { screenIs } = useScreen()
 
 const authorUrl = computed<string>(() => {
   return (page.props?.author_url as string) ?? "/"
@@ -92,7 +95,19 @@ const authorUrl = computed<string>(() => {
         </header>
 
         <!-- Map Renderer -->
-        <main class="flex-1 flex justify-center items-center">
+        <main
+          class="flex-1 flex flex-col gap-4 sm:flex-row sm:gap-0 justify-center items-center"
+        >
+          <div>
+            <MapPointerContent
+              v-if="screenIs('sm')"
+              :title="demoHighlightPointer.pointer.title"
+              :description="demoHighlightPointer.pointer.description"
+              :link="demoHighlightPointer.pointer.link"
+              :target="demoHighlightPointer.pointer.target"
+            >
+            </MapPointerContent>
+          </div>
           <div class="relative">
             <MapBase
               class="w-full max-w-2xl"
@@ -100,6 +115,7 @@ const authorUrl = computed<string>(() => {
               :pointers="demoPointers"
             />
             <MapPointer
+              v-if="!screenIs('sm')"
               :pointer="demoHighlightPointer.pointer"
               :pointer-style="demoHighlightPointer.style"
             />
@@ -108,7 +124,7 @@ const authorUrl = computed<string>(() => {
 
         <!-- Footer -->
         <footer
-          class="grid grid-cols-2 py-16 text-sm text-black dark:text-white/70 lg:grid-cols-3 items-center"
+          class="grid grid-cols-2 py-10 text-sm text-black dark:text-white/70 lg:grid-cols-3 items-center"
         >
           <ThemeToggle />
 

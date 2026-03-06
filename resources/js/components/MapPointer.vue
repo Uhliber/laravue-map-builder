@@ -8,8 +8,9 @@ import {
   flip,
   arrow as arrowMiddleware,
 } from "@floating-ui/vue"
-import { ChevronRightCircleIcon } from "lucide-vue-next"
+
 import type { MapPointer } from "@/types"
+import MapPointerContent from "@/components/MapPointerContent.vue"
 
 const props = withDefaults(
   defineProps<{
@@ -26,8 +27,6 @@ const arrow = ref<HTMLElement | null>(null)
 
 const pointerAssetPath = () =>
   `/images/pointers/${props.pointer.category}/${props.pointer.id}.${props.pointer.fileType}`
-
-const trigger = computed(() => props.pointer.trigger ?? "hover")
 
 const isMobile = ref(false)
 
@@ -105,10 +104,29 @@ const floatingClass = computed(() => {
   }
 })
 
+const trigger = computed(() => {
+  if (props.pointer.trigger === "disabled") return "disabled"
+
+  if (isMobile.value) {
+    if (props.pointer.trigger === "hover" || props.pointer.trigger === "always")
+      return "click"
+
+    return props.pointer.trigger ?? "click"
+  }
+
+  return props.pointer.trigger ?? "hover"
+})
+
 const popoverVisible = computed(() => {
   if (trigger.value === "disabled") return false
   if (trigger.value === "always") return true
   return open.value
+})
+
+watch(popoverVisible, (val) => {
+  if (isMobile.value) {
+    document.body.style.overflow = val ? "hidden" : ""
+  }
 })
 
 function showPopover() {
@@ -188,43 +206,22 @@ watch(
         v-if="popoverVisible && !isMobile"
         ref="floating"
         :style="floatingStyles"
-        :class="[
-          floatingClass,
-          'z-50 bg-white dark:bg-neutral-800 shadow-xl rounded-xl p-3 text-sm min-w-[180px] border border-gray-200 dark:border-neutral-700 backdrop-blur-sm',
-        ]"
+        :class="[floatingClass, 'z-50 min-w-[180px]']"
       >
         <!-- Arrow -->
         <div
           ref="arrow"
           :style="arrowStyle"
-          class="absolute w-3 h-3 rotate-45 bg-white dark:bg-neutral-800"
+          class="absolute z-[1] w-3 h-3 rotate-45 bg-white dark:bg-neutral-800"
         ></div>
 
-        <div class="flex gap-2">
-          <div class="flex-1">
-            <div class="font-semibold text-primary">
-              {{ pointer.title || pointer.name }}
-            </div>
-
-            <div
-              v-if="pointer.description"
-              class="text-xs text-muted-foreground"
-            >
-              {{ pointer.description }}
-            </div>
-          </div>
-
-          <div class="grid items-end">
-            <a
-              v-if="pointer.link"
-              :href="pointer.link"
-              :target="pointer.target || '_self'"
-              class="inline-flex items-center gap-1 text-primary text-xs hover:underline"
-            >
-              <ChevronRightCircleIcon class="w-4 h-4" />
-            </a>
-          </div>
-        </div>
+        <!-- Content -->
+        <MapPointerContent
+          :title="pointer.title || pointer.name"
+          :description="pointer.description"
+          :link="pointer.link"
+          :target="pointer.target"
+        />
       </div>
     </Transition>
   </div>
@@ -246,33 +243,15 @@ watch(
           @click="closeMobile"
         />
 
-        <!-- bottom sheet -->
         <div
-          class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[999] w-[92vw] max-w-sm bg-white dark:bg-neutral-800 shadow-2xl rounded-xl p-4 border border-gray-200 dark:border-neutral-700"
+          class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[999] w-[92vw] max-w-sm"
         >
-          <div class="flex gap-3">
-            <div class="flex-1">
-              <div class="font-semibold text-primary text-sm">
-                {{ pointer.title || pointer.name }}
-              </div>
-
-              <div
-                v-if="pointer.description"
-                class="text-xs text-muted-foreground mt-1"
-              >
-                {{ pointer.description }}
-              </div>
-            </div>
-
-            <a
-              v-if="pointer.link"
-              :href="pointer.link"
-              :target="pointer.target || '_self'"
-              class="flex items-center text-primary"
-            >
-              <ChevronRightCircleIcon class="w-5 h-5" />
-            </a>
-          </div>
+          <MapPointerContent
+            :title="pointer.title || pointer.name"
+            :description="pointer.description"
+            :link="pointer.link"
+            :target="pointer.target"
+          />
         </div>
       </div>
     </Transition>
