@@ -13,7 +13,7 @@ export const demoHighlightPointer: {
     fileType: "svg",
     title: "Welcome!",
     description:
-      "Start creating your own map layout and place markers anywhere you like. Click the arrow to begin building your map.",
+      "Add an interactive map to help users explore and navigate your site. Click the popover to start building.",
     link: "/login",
     x: 0,
     y: 0,
@@ -25,8 +25,8 @@ export const demoHighlightPointer: {
   style: {
     left: "-160px",
     bottom: "-50px",
-    width: "350px",
-    height: "350px",
+    width: "300px",
+    height: "300px",
   },
 }
 
