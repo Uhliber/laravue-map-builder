@@ -123,4 +123,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'author_url' => env('AUTHOR_URL', 'https://olivercape.me/'),
+
 ];
