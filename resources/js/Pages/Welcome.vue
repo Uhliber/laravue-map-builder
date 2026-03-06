@@ -37,10 +37,10 @@ const authorUrl = computed<string>(() => {
     <!-- Background Blur -->
     <div class="absolute -z-10 inset-0 overflow-hidden pointer-events-none">
       <div
-        class="absolute -top-40 -left-40 w-96 h-96 bg-primary/30 dark:bg-primary/10 rounded-full blur-[120px]"
+        class="absolute -top-40 -left-40 w-96 h-96 bg-primary-100/80 dark:bg-primary/10 rounded-full blur-[120px]"
       />
       <div
-        class="absolute top-40 right-0 w-96 h-96 bg-primary/20 dark:bg-primary/5 rounded-full blur-[120px]"
+        class="absolute top-40 right-0 w-96 h-96 bg-primary-200/60 dark:bg-primary/5 rounded-full blur-[120px]"
       />
     </div>
 
