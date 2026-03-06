@@ -1,3 +1,5 @@
+import type { Side } from "@floating-ui/vue"
+
 export interface User {
   id: number
   name: string
@@ -17,8 +19,9 @@ export interface MapPointer {
   link?: string
   target?: string
   trigger?: "hover" | "click" | "always" | "disabled"
-  placement?: string
+  placement?: Side
   offset?: number
+  animate?: boolean
 }
 
 export type PageProps<

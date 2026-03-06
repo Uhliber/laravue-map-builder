@@ -53,13 +53,13 @@ const authorUrl = computed<string>(() => {
         >
           <Link
             href="/"
-            class="flex items-center lg:col-start-2 lg:justify-center"
+            class="flex items-center lg:col-start-2 lg:justify-center text-nowrap"
           >
             <div
-              class="flex gap-2 items-center font-bebas text-4xl text-primary"
+              class="flex gap-2 items-center font-bebas text-2xl sm:text-4xl text-primary"
             >
               Map Builder
-              <MapPinPen class="text-primary w-7 h-7 mb-1" />
+              <MapPinPen class="text-primary w-5 h-5 lg:w-7 lg:h-7 mb-1" />
             </div>
           </Link>
 
@@ -95,15 +95,13 @@ const authorUrl = computed<string>(() => {
         <main class="flex-1 flex justify-center items-center">
           <div class="relative">
             <MapBase
-              class="w-full max-w-2xl transform rotate-2"
+              class="w-full max-w-2xl"
               :map-image="demoMapBaseImage"
               :pointers="demoPointers"
             />
             <MapPointer
-              class="absolute z-[1] scale-[0.7] translate-x-16 translate-y-9 sm:scale-100 sm:translate-x-0 sm:translate-y-0 !group-hover:transition-none"
               :pointer="demoHighlightPointer.pointer"
               :pointer-style="demoHighlightPointer.style"
-              no-animate
             />
           </div>
         </main>

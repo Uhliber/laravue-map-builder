@@ -2,7 +2,10 @@ import type { MapPointer } from "@/types"
 
 export const demoMapBaseImage = "/images/base/base-1.jpg"
 
-export const demoHighlightPointer = {
+export const demoHighlightPointer: {
+  pointer: MapPointer
+  style: Record<string, string | number>
+} = {
   pointer: {
     id: "landmark-ship",
     name: "Ship",
@@ -17,12 +20,13 @@ export const demoHighlightPointer = {
     trigger: "always",
     placement: "right",
     offset: -30,
+    animate: false,
   },
   style: {
     left: "-160px",
     bottom: "-50px",
-    width: "400px",
-    height: "400px",
+    width: "350px",
+    height: "350px",
   },
 }
 
@@ -38,6 +42,8 @@ export const demoPointers: MapPointer[] = [
     description: "Chill zone for networking.",
     link: "/",
     trigger: "hover",
+    placement: "left",
+    animate: true,
   },
   {
     id: "landmark-pyramid",
@@ -50,6 +56,8 @@ export const demoPointers: MapPointer[] = [
     description: "Hover over the landmarks to show popovers.",
     link: "/",
     trigger: "always",
+    placement: "top",
+    animate: true,
   },
   {
     id: "landmark-volcano",
@@ -62,6 +70,8 @@ export const demoPointers: MapPointer[] = [
     description: "Snacks and drinks available.",
     link: "/",
     trigger: "hover",
+    placement: "right",
+    animate: true,
   },
   {
     id: "landmark-hut",
@@ -74,5 +84,6 @@ export const demoPointers: MapPointer[] = [
     description: "Quiet resting area.",
     link: "/",
     trigger: "hover",
+    animate: true,
   },
 ]
