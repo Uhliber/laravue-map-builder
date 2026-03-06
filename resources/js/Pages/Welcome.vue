@@ -3,7 +3,7 @@ import { Head, Link, usePage } from "@inertiajs/vue3"
 import { MapPinPen } from "lucide-vue-next"
 import ThemeToggle from "@/components/ThemeToggle.vue"
 import { PageProps } from "@/types"
-import { computed } from "vue"
+import { computed, ref } from "vue"
 import { useScreen } from "@/composables/useScreen"
 
 import MapBase from "@/components/MapBase.vue"
@@ -24,10 +24,15 @@ defineProps<{
 
 const page = usePage<PageProps>()
 const { screenIs } = useScreen()
+const mapHighlightVisible = ref(false)
 
 const authorUrl = computed<string>(() => {
   return (page.props?.author_url as string) ?? "/"
 })
+
+function onMapLoaded() {
+  mapHighlightVisible.value = true
+}
 </script>
 
 <template>
@@ -113,9 +118,10 @@ const authorUrl = computed<string>(() => {
               class="w-full max-w-2xl"
               :map-image="demoMapBaseImage"
               :pointers="demoPointers"
+              @map-loaded="onMapLoaded"
             />
             <MapPointer
-              v-if="!screenIs('sm')"
+              v-if="mapHighlightVisible && !screenIs('sm')"
               :pointer="demoHighlightPointer.pointer"
               :pointer-style="demoHighlightPointer.style"
             />

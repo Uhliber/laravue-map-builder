@@ -8,12 +8,21 @@ let resizeTimeout: number | null = null
 
 const POINTER_BASE_SIZE = 180
 
+const emit = defineEmits<{
+  "map-loaded": [boolean]
+}>()
+
 const props = defineProps<{
   mapImage: string
   pointers: PointerType[]
 }>()
 
 const mapContainer = ref<HTMLDivElement | null>(null)
+
+/**
+ * Map loading state ⭐
+ */
+const mapLoaded = ref(false)
 
 const mapWidth = ref(0)
 const mapHeight = ref(0)
@@ -61,6 +70,10 @@ function handleMapLoad(event: Event) {
     width: img.naturalWidth,
     height: img.naturalHeight,
   }
+
+  mapLoaded.value = true
+
+  emit("map-loaded", true)
 }
 
 /**
@@ -78,9 +91,7 @@ function pointerStyle(pointer: PointerType) {
   const scaleX = mapWidth.value / naturalMapSize.value.width
   const scaleY = mapHeight.value / naturalMapSize.value.height
 
-  const scale = (scaleX + scaleY) / 2
-
-  const size = POINTER_BASE_SIZE * scale
+  const size = POINTER_BASE_SIZE * ((scaleX + scaleY) / 2)
 
   return {
     left: `${pointer.x * scaleX}px`,
@@ -100,16 +111,15 @@ function pointerStyle(pointer: PointerType) {
       @load="handleMapLoad"
     />
 
-    <!-- Pointer Layer -->
-    <div class="absolute inset-0 pointer-events-none">
+    <!-- Pointer Layer ⭐ only show after map is loaded -->
+    <div v-if="mapLoaded" class="absolute inset-0 pointer-events-none">
       <MapPointer
         v-for="pointer in mapPointers"
         :key="pointer.id"
         :pointer="pointer"
         :is-resizing="isResizing"
         :pointer-style="pointerStyle(pointer)"
-      >
-      </MapPointer>
+      />
     </div>
   </div>
 </template>
