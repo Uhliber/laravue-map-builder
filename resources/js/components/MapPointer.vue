@@ -123,9 +123,22 @@ const popoverVisible = computed(() => {
   return open.value
 })
 
+let scrollUnlockTimeout: number | null = null
+
 watch(popoverVisible, (val) => {
-  if (isMobile.value) {
-    document.body.style.overflow = val ? "hidden" : ""
+  if (!isMobile.value) return
+
+  if (scrollUnlockTimeout) {
+    clearTimeout(scrollUnlockTimeout)
+    scrollUnlockTimeout = null
+  }
+
+  if (val) {
+    document.body.style.overflow = "hidden"
+  } else {
+    scrollUnlockTimeout = window.setTimeout(() => {
+      document.body.style.overflow = ""
+    }, 250)
   }
 })
 
