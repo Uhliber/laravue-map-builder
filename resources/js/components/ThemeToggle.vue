@@ -1,11 +1,21 @@
 <script setup lang="ts">
-import { computed } from "vue"
+import { computed, onMounted } from "vue"
 import { Sun, Moon } from "lucide-vue-next"
 import { useThemeStore } from "@/stores/theme"
 
 const themeStore = useThemeStore()
 
-const isDark = computed(() => themeStore.theme === "dark")
+onMounted(() => {
+  themeStore.hydrateTheme()
+})
+
+const isDark = computed(() => {
+  if (themeStore.theme === "system") {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+  }
+
+  return themeStore.theme === "dark"
+})
 
 const toggleTheme = () => {
   themeStore.setTheme(isDark.value ? "light" : "dark")
