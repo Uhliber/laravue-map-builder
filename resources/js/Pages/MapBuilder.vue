@@ -182,7 +182,7 @@ function realignPointers() {
             draggable="true"
             @mousedown="(e) => startDrag(pointer.id, e)"
           >
-            <img :src="pointer.src" class="w-12 h-12" />
+            <img :src="pointer.src" class="w-12 h-12 min-w-max" />
           </div>
         </div>
       </main>

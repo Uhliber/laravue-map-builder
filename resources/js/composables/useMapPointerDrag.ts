@@ -114,38 +114,35 @@ export function useMapPointerDrag(
   }
 
   function handleStop() {
-    if (!draggedPointerId.value || !mapContainer.value) return
+    if (!draggedPointerId.value || !mapContainer.value) {
+      draggedPointerId.value = null
+      isDragging.value = false
+      return
+    }
 
     const pointer = workspacePointers[draggedPointerId.value]
-    if (!pointer) return
+    if (!pointer) {
+      draggedPointerId.value = null
+      isDragging.value = false
+      return
+    }
 
     const rect = mapContainer.value.getBoundingClientRect()
 
     const pointerSize = options?.pointerSize ?? 48
 
-    let x = pointer.x ?? 0
-    let y = pointer.y ?? 0
-
+    if (pointer.x == null || pointer.y == null) {
+      draggedPointerId.value = null
+      isDragging.value = false
+      return
+    }
     const minX = 0
     const minY = 0
     const maxX = rect.width - pointerSize
     const maxY = rect.height - pointerSize
 
-    const isInside = x >= minX && y >= minY && x <= maxX && y <= maxY
-
-    if (!isInside) {
-      const distLeft = Math.abs(x - minX)
-      const distRight = Math.abs(x - maxX)
-      const distTop = Math.abs(y - minY)
-      const distBottom = Math.abs(y - maxY)
-
-      const minDist = Math.min(distLeft, distRight, distTop, distBottom)
-
-      if (minDist === distLeft) pointer.x = minX
-      else if (minDist === distRight) pointer.x = maxX
-      else if (minDist === distTop) pointer.y = minY
-      else pointer.y = maxY
-    }
+    pointer.x = Math.min(Math.max(pointer.x, minX), maxX)
+    pointer.y = Math.min(Math.max(pointer.y, minY), maxY)
 
     draggedPointerId.value = null
     isDragging.value = false
