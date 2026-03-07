@@ -19,9 +19,6 @@ const props = defineProps<{
 
 const mapContainer = ref<HTMLDivElement | null>(null)
 
-/**
- * Map loading state ⭐
- */
 const mapLoaded = ref(false)
 
 const mapWidth = ref(0)
@@ -36,9 +33,6 @@ const mapPointers = computed(() =>
   props.pointers.filter((p) => p.x !== null && p.y !== null),
 )
 
-/**
- * Detect map container size
- */
 onMounted(() => {
   if (!mapContainer.value) return
 
@@ -60,9 +54,6 @@ onMounted(() => {
   observer.observe(mapContainer.value)
 })
 
-/**
- * Capture real map image intrinsic dimension
- */
 function handleMapLoad(event: Event) {
   const img = event.target as HTMLImageElement
 
@@ -76,9 +67,6 @@ function handleMapLoad(event: Event) {
   emit("map-loaded", true)
 }
 
-/**
- * Pointer rendering math
- */
 function pointerStyle(pointer: PointerType) {
   if (pointer.x === null || pointer.y === null)
     return {
