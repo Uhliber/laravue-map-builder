@@ -52,8 +52,11 @@ function toggleSection(section: string): void {
   }
 }
 
-watch(sidebarOpen, (open) => {
+watch(sidebarOpen, async (open) => {
   if (!open) openSections.value = []
+
+  await nextTick()
+  realignPointers()
 })
 
 onMounted(() => {
@@ -62,6 +65,29 @@ onMounted(() => {
 
 function setBaseMap(asset: MapAsset): void {
   activeBaseMap.value = asset
+}
+
+function realignPointers() {
+  if (!mapContainer.value) return
+
+  const rect = mapContainer.value.getBoundingClientRect()
+
+  const width = rect.width
+  const height = rect.height
+
+  Object.values(mapPointers).forEach((pointer) => {
+    console.log(mapPointers)
+    if (pointer.x == null || pointer.y == null) return
+
+    /**
+     * Normalize based on current container size
+     */
+    const px = pointer.x / width
+    const py = pointer.y / height
+
+    pointer.x = px * width
+    pointer.y = py * height
+  })
 }
 </script>
 

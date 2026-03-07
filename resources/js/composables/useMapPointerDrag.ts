@@ -1,5 +1,5 @@
 import { ref, computed, nextTick } from "vue"
-import { useMouse, useElementBounding, useEventListener } from "@vueuse/core"
+import { useMouse, useEventListener } from "@vueuse/core"
 import type { Ref } from "vue"
 import { MapAsset, MapPointer } from "@/types"
 
@@ -25,7 +25,6 @@ export function useMapPointerDrag(
   const offsetY = ref(0)
 
   const mouse = useMouse()
-  const containerRect = useElementBounding(mapContainer)
 
   const assetMap = computed(() => {
     const map = new Map<string, MapAsset>()
@@ -67,11 +66,8 @@ export function useMapPointerDrag(
   async function startDrag(pointerId: string, event: MouseEvent) {
     let pointer = workspacePointers[pointerId]
 
-    console.log(pointer)
-
     if (!pointer) {
       pointer = await createWorkspacePointer(pointerId)
-      console.log(pointer)
       if (!pointer) return
     }
 
@@ -108,9 +104,13 @@ export function useMapPointerDrag(
       }
     }
 
-    pointer.x = mouse.x.value - containerRect.left.value - offsetX.value
+    const container = mapContainer.value
+    if (!container) return
 
-    pointer.y = mouse.y.value - containerRect.top.value - offsetY.value
+    const rect = container.getBoundingClientRect()
+
+    pointer.x = mouse.x.value - rect.left - offsetX.value
+    pointer.y = mouse.y.value - rect.top - offsetY.value
   }
 
   function handleStop() {
