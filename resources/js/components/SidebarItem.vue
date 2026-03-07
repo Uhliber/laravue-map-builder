@@ -6,13 +6,23 @@ const props = defineProps<{
   icon: LucideIcon
   label: string
   collapsed: boolean
+  open?: boolean
 }>()
 
 const emit = defineEmits<{
   click: []
 }>()
 
-const open = ref(false)
+const open = ref(props.open ?? false)
+
+watch(
+  () => props.open,
+  (val) => {
+    if (val !== undefined) {
+      open.value = val
+    }
+  },
+)
 
 function toggle() {
   emit("click")

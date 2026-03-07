@@ -11,6 +11,7 @@ export interface MapPointer {
   id: string
   name: string
   category: string
+  src?: string
   fileType: string
   x: number | null
   y: number | null
@@ -22,6 +23,7 @@ export interface MapPointer {
   placement?: Side
   offset?: number
   animate?: boolean
+  visible?: boolean
 }
 
 export type MapAssetCategory = "base" | "pointers"
