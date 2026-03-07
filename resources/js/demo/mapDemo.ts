@@ -1,5 +1,9 @@
-import type { MapPointer } from "@/types"
-import { PageProps } from "@/types"
+import type {
+  MapPointer,
+  MapAsset,
+  MapHighlightPointer,
+  PageProps,
+} from "@/types"
 import { usePage } from "@inertiajs/vue3"
 import { computed } from "vue"
 
@@ -11,10 +15,181 @@ const authorUrl = computed<string>(() => {
 
 export const demoMapBaseImage = "/images/base/base-1.jpg"
 
-export const demoHighlightPointer: {
-  pointer: MapPointer
-  style: Record<string, string | number>
-} = {
+export const demoAssets: MapAsset[] = [
+  //   Base
+
+  {
+    id: "base-1",
+    name: "Base 1",
+    category: "base",
+    subcategory: null,
+    src: "/images/base/base-1.jpg",
+    fileType: "jpg",
+  },
+  {
+    id: "base-2",
+    name: "Base 2",
+    category: "base",
+    subcategory: null,
+    src: "/images/base/base-2.jpg",
+    fileType: "jpg",
+  },
+  {
+    id: "base-3",
+    name: "Base 3",
+    category: "base",
+    subcategory: null,
+    src: "/images/base/base-3.jpg",
+    fileType: "jpg",
+  },
+
+  // Pointer: Base
+
+  {
+    id: "pointer-1",
+    name: "Pointer 1",
+    category: "pointers",
+    subcategory: "basic",
+    src: "/images/pointers/basic/pointer-1.png",
+    fileType: "png",
+  },
+  {
+    id: "pointer-2",
+    name: "Pointer 2",
+    category: "pointers",
+    subcategory: "basic",
+    src: "/images/pointers/basic/pointer-2.png",
+    fileType: "png",
+  },
+  {
+    id: "pointer-3",
+    name: "Pointer 3",
+    category: "pointers",
+    subcategory: "basic",
+    src: "/images/pointers/basic/pointer-3.png",
+    fileType: "png",
+  },
+  {
+    id: "pointer-4",
+    name: "Pointer 4",
+    category: "pointers",
+    subcategory: "basic",
+    src: "/images/pointers/basic/pointer-4.png",
+    fileType: "png",
+  },
+
+  //   Pointer: Dots
+
+  {
+    id: "dot-1",
+    name: "Dot 1",
+    category: "pointers",
+    subcategory: "dots",
+    src: "/images/pointers/dots/dot-1.svg",
+    fileType: "svg",
+  },
+  {
+    id: "dot-2",
+    name: "Dot 2",
+    category: "pointers",
+    subcategory: "dots",
+    src: "/images/pointers/dots/dot-2.svg",
+    fileType: "svg",
+  },
+  {
+    id: "dot-3",
+    name: "Dot 3",
+    category: "pointers",
+    subcategory: "dots",
+    src: "/images/pointers/dots/dot-3.svg",
+    fileType: "svg",
+  },
+
+  //   Pointer: Landmarks
+
+  {
+    id: "landmark-cave",
+    name: "Cave",
+    category: "pointers",
+    subcategory: "landmarks",
+    src: "/images/pointers/landmarks/landmark-cave.svg",
+    fileType: "svg",
+  },
+  {
+    id: "landmark-fossil",
+    name: "Fossil",
+    category: "pointers",
+    subcategory: "landmarks",
+    src: "/images/pointers/landmarks/landmark-fossil.svg",
+    fileType: "svg",
+  },
+  {
+    id: "landmark-headstones",
+    name: "Headstones",
+    category: "pointers",
+    subcategory: "landmarks",
+    src: "/images/pointers/landmarks/landmark-headstones.svg",
+    fileType: "svg",
+  },
+  {
+    id: "landmark-hut",
+    name: "Hut",
+    category: "pointers",
+    subcategory: "landmarks",
+    src: "/images/pointers/landmarks/landmark-hut.svg",
+    fileType: "svg",
+  },
+  {
+    id: "landmark-pyramid",
+    name: "Pyramid",
+    category: "pointers",
+    subcategory: "landmarks",
+    src: "/images/pointers/landmarks/landmark-pyramid.svg",
+    fileType: "svg",
+  },
+  {
+    id: "landmark-ruins",
+    name: "Ruins",
+    category: "pointers",
+    subcategory: "landmarks",
+    src: "/images/pointers/landmarks/landmark-ruins.svg",
+    fileType: "svg",
+  },
+  {
+    id: "landmark-ship",
+    name: "Ship",
+    category: "pointers",
+    subcategory: "landmarks",
+    src: "/images/pointers/landmarks/landmark-ship.svg",
+    fileType: "svg",
+  },
+  {
+    id: "landmark-totem",
+    name: "Totem",
+    category: "pointers",
+    subcategory: "landmarks",
+    src: "/images/pointers/landmarks/landmark-totem.svg",
+    fileType: "svg",
+  },
+  {
+    id: "landmark-tower",
+    name: "Tower",
+    category: "pointers",
+    subcategory: "landmarks",
+    src: "/images/pointers/landmarks/landmark-tower.svg",
+    fileType: "svg",
+  },
+  {
+    id: "landmark-volcano",
+    name: "Volcano",
+    category: "pointers",
+    subcategory: "landmarks",
+    src: "/images/pointers/landmarks/landmark-volcano.svg",
+    fileType: "svg",
+  },
+]
+
+export const demoHighlightPointer: MapHighlightPointer = {
   pointer: {
     id: "landmark-ship",
     name: "Ship",

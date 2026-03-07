@@ -24,6 +24,24 @@ export interface MapPointer {
   animate?: boolean
 }
 
+export type MapAssetCategory = "base" | "pointers"
+
+export type MapAssetSubcategory = "basic" | "dots" | "landmarks" | null
+
+export type MapAsset = {
+  id: string
+  name: string
+  category: MapAssetCategory
+  subcategory: MapAssetSubcategory
+  src: string
+  fileType: "jpg" | "png" | "svg"
+}
+
+export interface MapHighlightPointer {
+  pointer: MapPointer
+  style: Record<string, string | number>
+}
+
 export type PageProps<
   T extends Record<string, unknown> = Record<string, unknown>,
 > = T & {

@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import Button from "@/components/ui/button/Button.vue"
 import Card from "@/components/ui/card/Card.vue"
 import CardContent from "@/components/ui/card/CardContent.vue"
 import CardDescription from "@/components/ui/card/CardDescription.vue"
 import CardHeader from "@/components/ui/card/CardHeader.vue"
-import CardTitle from "@/components/ui/card/CardTitle.vue"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue"
-import { Head } from "@inertiajs/vue3"
+import { Head, Link } from "@inertiajs/vue3"
+import { Plus } from "lucide-vue-next"
 </script>
 
 <template>
@@ -19,15 +20,31 @@ import { Head } from "@inertiajs/vue3"
     </template>
 
     <div class="py-12">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <Card>
+      <div class="grid gap-4 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-end">
+          <Link v-show="false" :href="route('map-builder')">
+            <Button type="button">
+              <Plus class="text-primary-foreground"></Plus>
+              Build Map
+            </Button>
+          </Link>
+        </div>
+        <Card class="py-10">
           <CardHeader>
-            <CardTitle>Welcome!</CardTitle>
-
-            <CardDescription> You're logged in. </CardDescription>
+            <CardDescription class="text-center">
+              You do not have any maps yet. Click the button below and start
+              building!
+            </CardDescription>
           </CardHeader>
 
-          <CardContent class="max-w-xl"> </CardContent>
+          <CardContent class="w-full flex justify-center">
+            <Link :href="route('map-builder')">
+              <Button type="button">
+                <Plus class="text-primary-foreground"></Plus>
+                Build Map
+              </Button>
+            </Link>
+          </CardContent>
         </Card>
       </div>
     </div>
