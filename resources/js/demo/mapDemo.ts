@@ -220,8 +220,13 @@ export const demoPointers: MapPointer[] = [
     name: "Cave",
     category: "landmarks",
     fileType: "svg",
-    x: 580,
-    y: 530,
+
+    x: 52,
+    y: 55,
+
+    width: 16,
+    height: 16,
+
     title: "Main Social Cave",
     description: "Chill zone for networking.",
     link: "/",
@@ -234,8 +239,13 @@ export const demoPointers: MapPointer[] = [
     name: "Pyramid",
     category: "landmarks",
     fileType: "svg",
-    x: 320,
-    y: 200,
+
+    x: 30,
+    y: 20,
+
+    width: 16,
+    height: 16,
+
     title: "Explore the Map",
     description: "Hover over the landmarks to show popovers.",
     link: "/",
@@ -248,8 +258,13 @@ export const demoPointers: MapPointer[] = [
     name: "Volcano",
     category: "landmarks",
     fileType: "svg",
-    x: 60,
-    y: 380,
+
+    x: 6.2,
+    y: 36,
+
+    width: 16,
+    height: 16,
+
     title: "Food Volcano",
     description: "Snacks and drinks available.",
     link: "/",
@@ -262,8 +277,13 @@ export const demoPointers: MapPointer[] = [
     name: "Hut",
     category: "landmarks",
     fileType: "svg",
-    x: 650,
-    y: 280,
+
+    x: 60,
+    y: 30,
+
+    width: 16,
+    height: 16,
+
     title: "Relax Hut",
     description: "Quiet resting area.",
     link: "/",
@@ -275,8 +295,13 @@ export const demoPointers: MapPointer[] = [
     name: "Ollie",
     category: "other",
     fileType: "png",
-    x: 720,
-    y: 30,
+
+    x: 67,
+    y: 2,
+
+    width: 16,
+    height: 16,
+
     title: "Visit my Website!",
     link: authorUrl.value,
     target: "_blank",

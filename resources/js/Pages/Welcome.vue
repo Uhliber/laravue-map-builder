@@ -116,7 +116,7 @@ function onMapLoaded() {
           <div class="relative">
             <MapBase
               class="w-full max-w-2xl"
-              :map-image="demoMapBaseImage"
+              :map-image="{ id: 'demo', src: demoMapBaseImage }"
               :pointers="demoPointers"
               @map-loaded="onMapLoaded"
             />

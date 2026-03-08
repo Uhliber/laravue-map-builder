@@ -1,113 +1,61 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue"
-import type { MapPointer as PointerType } from "@/types"
+import { ref, computed } from "vue"
+import type { MapBaseAsset, MapPointer as PointerType } from "@/types"
 import MapPointer from "@/components/MapPointer.vue"
-
-const isResizing = ref(false)
-let resizeTimeout: number | null = null
-
-const POINTER_BASE_SIZE = 180
 
 const emit = defineEmits<{
   "map-loaded": [boolean]
 }>()
 
 const props = defineProps<{
-  mapImage: string
+  mapImage: MapBaseAsset
   pointers: PointerType[]
 }>()
 
 const mapContainer = ref<HTMLDivElement | null>(null)
-
 const mapLoaded = ref(false)
-
-const mapWidth = ref(0)
-const mapHeight = ref(0)
-
-const naturalMapSize = ref({
-  width: 500,
-  height: 500,
-})
 
 const mapPointers = computed(() =>
   props.pointers.filter((p) => p.x !== null && p.y !== null),
 )
 
-onMounted(() => {
-  if (!mapContainer.value) return
-
-  const observer = new ResizeObserver(() => {
-    isResizing.value = true
-
-    if (mapContainer.value) {
-      mapWidth.value = mapContainer.value.clientWidth
-      mapHeight.value = mapContainer.value.clientHeight
-    }
-
-    if (resizeTimeout) clearTimeout(resizeTimeout)
-
-    resizeTimeout = window.setTimeout(() => {
-      isResizing.value = false
-    }, 150)
-  })
-
-  observer.observe(mapContainer.value)
-})
-
-function handleMapLoad(event: Event) {
-  const img = event.target as HTMLImageElement
-
-  naturalMapSize.value = {
-    width: img.naturalWidth,
-    height: img.naturalHeight,
-  }
-
+function handleMapLoad() {
   mapLoaded.value = true
-
   emit("map-loaded", true)
 }
 
 function pointerStyle(pointer: PointerType) {
-  if (pointer.x === null || pointer.y === null)
-    return {
-      left: "0px",
-      top: "0px",
-      width: "0px",
-      height: "0px",
-    }
-
-  const scaleX = mapWidth.value / naturalMapSize.value.width
-  const scaleY = mapHeight.value / naturalMapSize.value.height
-
-  const size = POINTER_BASE_SIZE * ((scaleX + scaleY) / 2)
-
   return {
-    left: `${pointer.x * scaleX}px`,
-    top: `${pointer.y * scaleY}px`,
-    width: `${size}px`,
-    height: `${size}px`,
+    left: `${pointer.x}%`,
+    top: `${pointer.y}%`,
+    width: `${pointer.width}%`,
+    height: `${pointer.height}%`,
   }
 }
 </script>
 
 <template>
   <div ref="mapContainer" class="relative w-full select-none">
-    <!-- Base Map -->
-    <img
-      :src="mapImage"
-      class="w-full h-auto rounded-lg border block"
-      @load="handleMapLoad"
-    />
-
-    <!-- Pointer Layer ⭐ only show after map is loaded -->
-    <div v-if="mapLoaded" class="absolute inset-0 pointer-events-none">
-      <MapPointer
-        v-for="pointer in mapPointers"
-        :key="pointer.id"
-        :pointer="pointer"
-        :is-resizing="isResizing"
-        :pointer-style="pointerStyle(pointer)"
+    <div class="relative w-full inline-block">
+      <!-- Base Map -->
+      <img
+        :src="mapImage.src"
+        class="w-full h-auto rounded-lg border block"
+        @load="handleMapLoad"
       />
+
+      <!-- Pointer Layer -->
+      <div
+        v-if="mapLoaded"
+        class="absolute top-0 left-0 w-full h-full pointer-events-none"
+      >
+        <MapPointer
+          v-for="pointer in mapPointers"
+          :key="pointer.id"
+          :pointer="pointer"
+          :pointer-style="pointerStyle(pointer)"
+        />
+      </div>
     </div>
   </div>
 </template>

@@ -26,8 +26,13 @@ const props = withDefaults(
 
 const arrow = ref<HTMLElement | null>(null)
 
-const pointerAssetPath = () =>
-  `/images/pointers/${props.pointer.category}/${props.pointer.id}.${props.pointer.fileType}`
+const pointerAssetPath = () => {
+  if (props.pointer.src) {
+    return props.pointer.src
+  }
+
+  return `/images/pointers/${props.pointer.category}/${props.pointer.id}.${props.pointer.fileType}`
+}
 
 const { screenIsMobile } = useScreen()
 const isMobile = screenIsMobile

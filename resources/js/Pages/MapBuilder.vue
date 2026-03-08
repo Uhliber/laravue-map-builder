@@ -62,6 +62,16 @@ const allAssets = computed<MapAsset[]>(() => [
   ...assetsStore.pointerAssets,
 ])
 
+const sortedPointers = computed(() => {
+  const list = Object.values(mapPointers)
+
+  return list.sort((a, b) => {
+    if (a.id === selectedPointerId.value) return 1
+    if (b.id === selectedPointerId.value) return -1
+    return 0
+  })
+})
+
 const { startDrag, clampPointerPosition } = useMapPointerDrag(
   mapContainer,
   mapPointers,
@@ -73,7 +83,7 @@ const pointerSubcategories = computed(() => assetsStore.pointerSubcategories)
 
 const pointerAtMax = computed(() => {
   if (!selectedPointer.value) return true
-  return (selectedPointer.value.width ?? 8) >= 16
+  return (selectedPointer.value.width ?? 8) >= 24
 })
 
 const pointerAtMin = computed(() => {
@@ -201,8 +211,8 @@ function toggleTooltip(pointer: MapPointer, val: boolean) {
 }
 
 function increasePointerSize(pointer: MapPointer) {
-  pointer.width = Math.min((pointer.width ?? 8) + 2, 16)
-  pointer.height = Math.min((pointer.height ?? 8) + 2, 16)
+  pointer.width = Math.min((pointer.width ?? 8) + 2, 24)
+  pointer.height = Math.min((pointer.height ?? 8) + 2, 24)
 
   clampPointerPosition(pointer)
 }
@@ -414,11 +424,13 @@ function updatePointerTooltip(data: MapPointer) {
             </div>
           </div>
           <div
-            v-for="pointer in Object.values(mapPointers)"
+            v-for="pointer in sortedPointers"
             :key="pointer.id"
             :class="[
-              'absolute map-pointer z-[1]',
-              selectedPointerId === pointer.id ? 'ring-2 ring-primary' : '',
+              'absolute map-pointer',
+              selectedPointerId === pointer.id
+                ? 'z-[40] ring-2 ring-primary'
+                : 'z-[10]',
             ]"
             :style="{
               left: pointer.x + '%',
@@ -435,18 +447,20 @@ function updatePointerTooltip(data: MapPointer) {
               }
             "
           >
-            <img :src="pointer.src" class="w-full h-full min-w-max" />
+            <img :src="pointer.src" class="w-full h-full" />
           </div>
           <div
             v-if="selectedPointer"
-            class="absolute"
+            class="absolute z-[30] pointer-events-none"
             :style="{
               left: selectedPointer.x + '%',
               top: selectedPointer.y + '%',
-              transform: `translateX(${-(screenIsMobile ? 40 : 60) + (selectedPointer.width ?? 8)}%) translatey(${screenIsMobile ? (selectedPointer.height ?? 8) * 4.5 : -50}%)`,
+              transform: `translateX(${-(screenIsMobile ? 40 : 60) + (selectedPointer.width ?? 8) * 1.3}%) translatey(${screenIsMobile ? (selectedPointer.height ?? 8) * 4.5 : -50}%)`,
             }"
           >
-            <div class="grid items-center justify-items-end gap-2 pb-2">
+            <div
+              class="grid items-center justify-items-end gap-2 pb-2 pointer-events-auto"
+            >
               <!-- Toolbar -->
               <ButtonGroup @click.stop>
                 <ButtonGroup

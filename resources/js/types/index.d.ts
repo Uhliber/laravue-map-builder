@@ -8,7 +8,7 @@ export interface User {
 }
 
 export interface MapFormData {
-  base: MapAsset
+  base: MapBaseAsset
   pointers: MapPointer[]
 }
 export interface MapPointer {
@@ -17,8 +17,8 @@ export interface MapPointer {
   category: string
   src?: string
   fileType: string
-  x: number | null
-  y: number | null
+  x: number
+  y: number
   width?: number | null
   height?: number | null
   title?: string
@@ -47,6 +47,8 @@ export type MapAsset = {
 export type MapBaseAsset = {
   id: string
   src: string
+  naturalWidth?: number
+  naturalHeight?: number
 }
 
 export interface MapHighlightPointer {
