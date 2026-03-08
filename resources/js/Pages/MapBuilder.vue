@@ -2,6 +2,8 @@
 import { computed, reactive, onMounted, ref, watch, nextTick } from "vue"
 import { useMapPointerDrag } from "@/composables/useMapPointerDrag"
 
+import ThemeToggle from "@/components/ThemeToggle.vue"
+import Button from "@/components/ui/button/Button.vue"
 import BuilderLayout from "@/Layouts/BuilderLayout.vue"
 import Sidebar from "@/components/Sidebar.vue"
 import SidebarItem from "@/components/SidebarItem.vue"
@@ -69,6 +71,15 @@ function setBaseMap(asset: MapAsset): void {
   <Head title="Builder" />
 
   <BuilderLayout>
+    <template #actions>
+      <ThemeToggle />
+
+      <div class="flex gap-4">
+        <Button variant="outline">Preview</Button>
+        <Button type="submit">Save</Button>
+      </div>
+    </template>
+
     <div class="flex h-[calc(100vh-64px)] overflow-hidden">
       <!-- Sidebar -->
       <Sidebar v-model="sidebarOpen">
