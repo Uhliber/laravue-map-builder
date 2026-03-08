@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, watch, computed, onMounted, onUnmounted } from "vue"
+import { ref, watch, computed } from "vue"
+import { useScreen } from "@/composables/useScreen"
 import {
   useFloating,
   autoUpdate,
@@ -28,20 +29,8 @@ const arrow = ref<HTMLElement | null>(null)
 const pointerAssetPath = () =>
   `/images/pointers/${props.pointer.category}/${props.pointer.id}.${props.pointer.fileType}`
 
-const isMobile = ref(false)
-
-function detectMobile() {
-  isMobile.value = window.innerWidth < 640
-}
-
-onMounted(() => {
-  detectMobile()
-  window.addEventListener("resize", detectMobile)
-})
-
-onUnmounted(() => {
-  window.removeEventListener("resize", detectMobile)
-})
+const { screenIsMobile } = useScreen()
+const isMobile = screenIsMobile
 
 const open = ref(false)
 let hoverTimeout: number | null = null

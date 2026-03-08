@@ -1,4 +1,5 @@
-import { ref, onMounted, onUnmounted, nextTick } from "vue"
+import { computed } from "vue"
+import { useMediaQuery } from "@vueuse/core"
 
 type ScreenSize = "sm" | "md" | "lg" | "xl" | "2xl"
 
@@ -10,40 +11,31 @@ const breakpoints: Record<ScreenSize, number> = {
   "2xl": 1536,
 }
 
-export function useScreen(debounceMs = 120) {
-  const width = ref(window.innerWidth)
-
-  let resizeTimeout: number | null = null
-
-  function handleResize() {
-    if (resizeTimeout) clearTimeout(resizeTimeout)
-
-    resizeTimeout = window.setTimeout(() => {
-      width.value = window.innerWidth
-    }, debounceMs)
-  }
+export function useScreen() {
+  const sm = useMediaQuery(`(max-width: ${breakpoints.sm - 1}px)`)
+  const md = useMediaQuery(`(max-width: ${breakpoints.md - 1}px)`)
+  const lg = useMediaQuery(`(max-width: ${breakpoints.lg - 1}px)`)
+  const xl = useMediaQuery(`(max-width: ${breakpoints.xl - 1}px)`)
+  const xxl = useMediaQuery(`(max-width: ${breakpoints["2xl"] - 1}px)`)
 
   function screenIs(size: ScreenSize) {
-    return width.value < breakpoints[size]
+    switch (size) {
+      case "sm":
+        return sm.value
+      case "md":
+        return md.value
+      case "lg":
+        return lg.value
+      case "xl":
+        return xl.value
+      case "2xl":
+        return xxl.value
+    }
   }
 
-  function screenIsMobile() {
-    return width.value < breakpoints.sm
-  }
-
-  onMounted(async () => {
-    await nextTick()
-    width.value = window.innerWidth
-    window.addEventListener("resize", handleResize)
-  })
-
-  onUnmounted(() => {
-    window.removeEventListener("resize", handleResize)
-    if (resizeTimeout) clearTimeout(resizeTimeout)
-  })
+  const screenIsMobile = computed(() => sm.value)
 
   return {
-    width,
     screenIs,
     screenIsMobile,
   }
