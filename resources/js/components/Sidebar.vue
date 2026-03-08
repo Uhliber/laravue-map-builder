@@ -54,7 +54,7 @@ const toggleSidebar = () => {
 
     <!-- Menu -->
     <div
-      class="flex flex-col p-2 text-sm transition-all duration-300 ease-[cubic-bezier(.34,1.56,.64,1)] gap-2"
+      class="flex flex-col p-2 text-sm transition-all duration-300 ease-[cubic-bezier(.34,1.56,.64,1)] gap-2 overflow-y-auto"
     >
       <slot />
     </div>
