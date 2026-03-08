@@ -15,6 +15,8 @@ export interface MapPointer {
   fileType: string
   x: number | null
   y: number | null
+  width?: number | null
+  height?: number | null
   title?: string
   description?: string
   link?: string

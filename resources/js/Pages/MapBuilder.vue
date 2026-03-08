@@ -52,11 +52,8 @@ function toggleSection(section: string): void {
   }
 }
 
-watch(sidebarOpen, async (open) => {
+watch(sidebarOpen, (open) => {
   if (!open) openSections.value = []
-
-  await nextTick()
-  realignPointers()
 })
 
 onMounted(() => {
@@ -65,29 +62,6 @@ onMounted(() => {
 
 function setBaseMap(asset: MapAsset): void {
   activeBaseMap.value = asset
-}
-
-function realignPointers() {
-  if (!mapContainer.value) return
-
-  const rect = mapContainer.value.getBoundingClientRect()
-
-  const width = rect.width
-  const height = rect.height
-
-  Object.values(mapPointers).forEach((pointer) => {
-    console.log(mapPointers)
-    if (pointer.x == null || pointer.y == null) return
-
-    /**
-     * Normalize based on current container size
-     */
-    const px = pointer.x / width
-    const py = pointer.y / height
-
-    pointer.x = px * width
-    pointer.y = py * height
-  })
 }
 </script>
 
@@ -104,7 +78,6 @@ function realignPointers() {
 
         <template #header-label> ELEMENTS </template>
 
-        <!-- ================= BASE ASSETS ================= -->
         <SidebarItem
           :icon="Map"
           label="Base"
@@ -124,7 +97,6 @@ function realignPointers() {
           </div>
         </SidebarItem>
 
-        <!-- ================= POINTER ASSETS ================= -->
         <SidebarItem
           :icon="MapPin"
           label="Pointers"
@@ -156,13 +128,13 @@ function realignPointers() {
         </SidebarItem>
       </Sidebar>
 
-      <!-- ================= WORKSPACE ================= -->
+      <!-- Workspace -->
       <main
         class="flex justify-center flex-1 bg-neutral-50 dark:bg-neutral-950 p-6 overflow-auto"
       >
         <div
           ref="mapContainer"
-          class="relative w-full max-w-[780px] select-none"
+          class="relative w-full h-fit max-w-[780px] select-none"
         >
           <img
             v-if="activeBaseMap"
@@ -172,17 +144,22 @@ function realignPointers() {
           />
           <div
             v-else
-            class="bg-neutral-100 w-full h-auto rounded-lg aspect-square border block"
+            class="bg-neutral-100 dark:bg-neutral-800/30 w-full h-auto rounded-lg aspect-square border block"
           ></div>
           <div
             v-for="pointer in Object.values(mapPointers)"
             :key="pointer.id"
             class="absolute"
-            :style="{ left: pointer.x + 'px', top: pointer.y + 'px' }"
+            :style="{
+              left: pointer.x + '%',
+              top: pointer.y + '%',
+              width: (pointer.width ?? 6) + '%',
+              height: (pointer.height ?? 6) + '%',
+            }"
             draggable="true"
             @mousedown="(e) => startDrag(pointer.id, e)"
           >
-            <img :src="pointer.src" class="w-12 h-12 min-w-max" />
+            <img :src="pointer.src" class="w-full h-full min-w-max" />
           </div>
         </div>
       </main>

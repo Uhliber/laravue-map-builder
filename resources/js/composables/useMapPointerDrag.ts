@@ -8,7 +8,6 @@ export function useMapPointerDrag(
   workspacePointers: Record<string, MapPointer | null>,
   initialAssets: Ref<MapAsset[]>,
   options?: {
-    pointerSize?: number
     dragThreshold?: number
   },
 ) {
@@ -38,13 +37,11 @@ export function useMapPointerDrag(
 
   async function createWorkspacePointer(assetId: string) {
     await nextTick()
+
     if (!mapContainer.value) return null
 
     const asset = assetMap.value.get(assetId)
-
     if (!asset) return null
-
-    const rect = mapContainer.value.getBoundingClientRect()
 
     const id = `${assetId}-${Date.now()}`
 
@@ -54,8 +51,13 @@ export function useMapPointerDrag(
       category: asset.category,
       fileType: asset.fileType,
       src: asset.src,
-      x: rect.width / 2,
-      y: rect.height / 2,
+
+      // center spawn (normalized percent)
+      x: 50,
+      y: 50,
+
+      width: 6,
+      height: 6,
     }
 
     workspacePointers[id] = pointer
@@ -105,12 +107,16 @@ export function useMapPointerDrag(
     }
 
     const container = mapContainer.value
-    if (!container) return
-
     const rect = container.getBoundingClientRect()
 
-    pointer.x = mouse.x.value - rect.left - offsetX.value
-    pointer.y = mouse.y.value - rect.top - offsetY.value
+    if (!rect.width || !rect.height) return
+
+    // Do NOT clamp during dragging
+    const nx = (mouse.x.value - rect.left - offsetX.value) / rect.width
+    const ny = (mouse.y.value - rect.top - offsetY.value) / rect.height
+
+    pointer.x = nx * 100
+    pointer.y = ny * 100
   }
 
   function handleStop() {
@@ -128,21 +134,26 @@ export function useMapPointerDrag(
     }
 
     const rect = mapContainer.value.getBoundingClientRect()
+    if (!rect.width || !rect.height) return
 
-    const pointerSize = options?.pointerSize ?? 48
-
-    if (pointer.x == null || pointer.y == null) {
+    if (!isDragging.value) {
+      if (!workspacePointers[draggedPointerId.value]) {
+        pointer.x = 50
+        pointer.y = 50
+      }
       draggedPointerId.value = null
       isDragging.value = false
       return
-    }
-    const minX = 0
-    const minY = 0
-    const maxX = rect.width - pointerSize
-    const maxY = rect.height - pointerSize
+    } else {
+      let nx = (mouse.x.value - rect.left - offsetX.value) / rect.width
+      let ny = (mouse.y.value - rect.top - offsetY.value) / rect.height
 
-    pointer.x = Math.min(Math.max(pointer.x, minX), maxX)
-    pointer.y = Math.min(Math.max(pointer.y, minY), maxY)
+      nx = Math.max(0, Math.min(1, nx))
+      ny = Math.max(0, Math.min(1, ny))
+
+      pointer.x = nx * 100
+      pointer.y = ny * 100
+    }
 
     draggedPointerId.value = null
     isDragging.value = false
