@@ -4,6 +4,7 @@ import Card from "@/components/ui/card/Card.vue"
 import CardContent from "@/components/ui/card/CardContent.vue"
 import CardDescription from "@/components/ui/card/CardDescription.vue"
 import CardHeader from "@/components/ui/card/CardHeader.vue"
+import CardTitle from "@/components/ui/card/CardTitle.vue"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue"
 import { Head, Link } from "@inertiajs/vue3"
 import { Plus } from "lucide-vue-next"
@@ -31,6 +32,7 @@ import { Plus } from "lucide-vue-next"
         </div>
         <Card class="py-10">
           <CardHeader>
+            <CardTitle class="text-center">Create your first map</CardTitle>
             <CardDescription class="text-center">
               You do not have any maps yet. Click the button below and start
               building!
