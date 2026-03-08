@@ -22,6 +22,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/map-builder', [MapBuilderController::class, 'index'])
         ->name('map-builder');
+
+    Route::get('/map-preview', [MapBuilderController::class, 'preview'])
+        ->name('map-preview');
 });
 
 Route::middleware('auth')->group(function () {

@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { computed, reactive, onMounted, ref, watch, nextTick } from "vue"
+import { debounce } from "lodash-es"
+import { toast } from "vue-sonner"
+
 import { useMapPointerDrag } from "@/composables/useMapPointerDrag"
 
 import ThemeToggle from "@/components/ThemeToggle.vue"
@@ -24,6 +27,7 @@ import { MapAsset, MapPointer } from "@/types"
 import ButtonGroup from "@/components/ui/button-group/ButtonGroup.vue"
 import Switch from "@/components/ui/switch/Switch.vue"
 import { useScreen } from "@/composables/useScreen"
+import TooltipSettingsDialog from "@/components/TooltipSettingsDialog.vue"
 
 const assetsStore = useAssetsStore()
 const { screenIsMobile } = useScreen()
@@ -46,6 +50,8 @@ const mapPointers = reactive<Record<string, MapPointer>>({})
 const mapContainer = ref<HTMLElement | null>(null)
 
 const selectedPointerId = ref<string | null>(null)
+
+const tooltipDialogOpen = ref(false)
 
 const selectedPointer = computed(() =>
   selectedPointerId.value ? mapPointers[selectedPointerId.value] : null,
@@ -95,6 +101,8 @@ function toggleSection(section: string): void {
   }
 }
 
+const debouncedSave = debounce(saveToLocalStorage, 300)
+
 watch(sidebarOpen, (open) => {
   if (!open) openSections.value = []
 })
@@ -107,9 +115,53 @@ watch(
   { deep: true },
 )
 
+watch(formData, () => debouncedSave(), { deep: true })
+
 onMounted(() => {
   assetsStore.fetchAssets()
+
+  nextTick(() => {
+    loadFromLocalStorage()
+    openSections.value = ["Base", "Pointers"]
+  })
 })
+
+const STORAGE_KEY = "map-builder-formdata"
+
+function saveToLocalStorage() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(formData))
+}
+
+function loadFromLocalStorage() {
+  const raw = localStorage.getItem(STORAGE_KEY)
+  if (!raw) return
+
+  try {
+    const parsed = JSON.parse(raw)
+
+    if (parsed?.base) formData.base = parsed.base
+    if (parsed?.pointers) formData.pointers = parsed.pointers
+
+    /**
+     * Restore workspace state
+     */
+    if (parsed?.base) {
+      const baseAsset = assetsStore.baseAssets.find(
+        (a) => a.id === parsed.base.id,
+      )
+
+      if (baseAsset) activeBaseMap.value = baseAsset
+    }
+
+    if (parsed?.pointers) {
+      parsed.pointers.forEach((p: MapPointer) => {
+        mapPointers[p.id] = p
+      })
+    }
+  } catch {
+    console.warn("Failed loading builder state")
+  }
+}
 
 function setBaseMap(asset: MapAsset): void {
   activeBaseMap.value = asset
@@ -173,7 +225,78 @@ function removePointer(pointerId: string) {
 }
 
 function saveMap() {
-  router.post("/map-builder", formData)
+  if (!formData.base) {
+    toast.error("Base map required", {
+      description: "Select a base map before saving.",
+      class:
+        "border border-destructive/30 shadow-md dark:!border-destructive/40 dark:!bg-neutral-800",
+    })
+    return
+  }
+
+  if (!formData.pointers.length) {
+    toast.error("Pointer required", {
+      description: "Add at least one pointer before saving.",
+      class:
+        "border border-destructive/30 shadow-md dark:!border-destructive/40 dark:!bg-neutral-800",
+    })
+    return
+  }
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(formData))
+
+  toast.success("Map saved", {
+    description: "Your map configuration was stored locally.",
+    class:
+      "border border-primary/30 shadow-md dark:!border-primary/40 dark:!bg-neutral-800",
+  })
+}
+
+function handlePreview() {
+  const raw = localStorage.getItem(STORAGE_KEY)
+
+  if (!raw) {
+    toast.error("Nothing to preview", {
+      description: "Build your map first before opening preview.",
+      class:
+        "border border-destructive/30 shadow-md dark:!border-destructive/40 dark:!bg-neutral-800",
+    })
+    return
+  }
+
+  try {
+    const parsed = JSON.parse(raw)
+
+    if (!parsed?.base || !parsed?.pointers?.length) {
+      toast.error("Map is empty", {
+        description:
+          "Please add a base map and at least one pointer before preview.",
+        class:
+          "border border-destructive/30 shadow-md dark:!border-destructive/40 dark:!bg-neutral-800",
+      })
+      return
+    }
+
+    saveToLocalStorage()
+    router.get("/map-preview")
+  } catch {
+    toast.error("Preview error", {
+      description: "Saved map data is corrupted.",
+      class:
+        "border border-destructive/30 shadow-md dark:!border-destructive/40 dark:!bg-neutral-800",
+    })
+  }
+}
+
+function openTooltipSettings() {
+  if (!selectedPointer.value) return
+  tooltipDialogOpen.value = true
+}
+
+function updatePointerTooltip(data: MapPointer) {
+  if (!selectedPointer.value) return
+
+  Object.assign(selectedPointer.value, data)
 }
 </script>
 
@@ -185,7 +308,7 @@ function saveMap() {
       <ThemeToggle />
 
       <div class="flex gap-4">
-        <Button variant="outline">Preview</Button>
+        <Button variant="outline" @click="handlePreview"> Preview </Button>
         <Button @click="saveMap">Save</Button>
       </div>
     </template>
@@ -356,6 +479,7 @@ function saveMap() {
                     size="icon-sm"
                     title="Open Tooltip Setting"
                     :disabled="selectedPointer.trigger === 'disabled'"
+                    @click="openTooltipSettings"
                   >
                     <MessageSquareMore
                       :class="{
@@ -390,6 +514,7 @@ function saveMap() {
                   size="icon-sm"
                   title="Open Tooltip Setting"
                   :disabled="selectedPointer.trigger === 'disabled'"
+                  @click="openTooltipSettings"
                 >
                   <MessageSquareMore
                     :class="{
@@ -434,5 +559,10 @@ function saveMap() {
         </div>
       </main>
     </div>
+    <TooltipSettingsDialog
+      v-model:open="tooltipDialogOpen"
+      :pointer="selectedPointer"
+      @save="updatePointerTooltip"
+    />
   </BuilderLayout>
 </template>

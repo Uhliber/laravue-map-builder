@@ -7,6 +7,10 @@ export interface User {
   email_verified_at?: string
 }
 
+export interface MapFormData {
+  base: MapAsset
+  pointers: MapPointer[]
+}
 export interface MapPointer {
   id: string
   name: string
@@ -38,6 +42,11 @@ export type MapAsset = {
   subcategory: MapAssetSubcategory
   src: string
   fileType: "jpg" | "png" | "svg"
+}
+
+export type MapBaseAsset = {
+  id: string
+  src: string
 }
 
 export interface MapHighlightPointer {

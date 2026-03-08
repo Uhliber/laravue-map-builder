@@ -13,4 +13,9 @@ class MapBuilderController extends Controller
             // You can pass props here later
         ]);
     }
+
+     public function preview()
+    {
+        return Inertia::render('MapPreview');
+    }
 }

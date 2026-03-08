@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { Link } from "@inertiajs/vue3"
 import { House } from "lucide-vue-next"
+
+import "vue-sonner/style.css"
+import { Toaster } from "vue-sonner"
 </script>
 
 <template>
+  <Toaster position="top-center" richColors />
   <div>
     <div class="min-h-screen">
       <nav class="border-b border-neutral-100 dark:border-neutral-800">

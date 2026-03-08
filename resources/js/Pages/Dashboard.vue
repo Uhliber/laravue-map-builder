@@ -7,7 +7,28 @@ import CardHeader from "@/components/ui/card/CardHeader.vue"
 import CardTitle from "@/components/ui/card/CardTitle.vue"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue"
 import { Head, Link } from "@inertiajs/vue3"
-import { Plus } from "lucide-vue-next"
+import { Play, Plus } from "lucide-vue-next"
+import { onMounted, ref } from "vue"
+
+const hasDraftMap = ref(false)
+
+onMounted(() => {
+  const draft = localStorage.getItem("map-builder-formdata")
+
+  console.log(draft)
+
+  if (draft) {
+    try {
+      const parsed = JSON.parse(draft)
+      hasDraftMap.value =
+        parsed &&
+        ((parsed.base && parsed.pointers?.length) ||
+          parsed.pointers?.length > 0)
+    } catch {
+      hasDraftMap.value = false
+    }
+  }
+})
 </script>
 
 <template>
@@ -25,8 +46,9 @@ import { Plus } from "lucide-vue-next"
         <div class="flex justify-end">
           <Link v-show="false" :href="route('map-builder')">
             <Button type="button">
-              <Plus class="text-primary-foreground"></Plus>
-              Build Map
+              <Plus v-if="!hasDraftMap" class="text-primary-foreground"></Plus>
+              <Play v-else class="text-primary-foreground"></Play>
+              {{ hasDraftMap ? "Continue Building" : "Build Map" }}
             </Button>
           </Link>
         </div>
@@ -42,8 +64,12 @@ import { Plus } from "lucide-vue-next"
           <CardContent class="w-full flex justify-center">
             <Link :href="route('map-builder')">
               <Button type="button">
-                <Plus class="text-primary-foreground"></Plus>
-                Build Map
+                <Plus
+                  v-if="!hasDraftMap"
+                  class="text-primary-foreground"
+                ></Plus>
+                <Play v-else class="text-primary-foreground"></Play>
+                {{ hasDraftMap ? "Continue Building" : "Build Map" }}
               </Button>
             </Link>
           </CardContent>
