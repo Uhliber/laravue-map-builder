@@ -148,8 +148,13 @@ export function useMapPointerDrag(
       let nx = (mouse.x.value - rect.left - offsetX.value) / rect.width
       let ny = (mouse.y.value - rect.top - offsetY.value) / rect.height
 
-      nx = Math.max(0, Math.min(1, nx))
-      ny = Math.max(0, Math.min(1, ny))
+      // pointer width/height in percent
+      const pointerWidth = (pointer.width ?? 8) / 100
+      const pointerHeight = (pointer.height ?? 8) / 100
+
+      // clamp while respecting pointer size
+      nx = Math.max(0, Math.min(1 - pointerWidth, nx))
+      ny = Math.max(0, Math.min(1 - pointerHeight, ny))
 
       pointer.x = nx * 100
       pointer.y = ny * 100
@@ -159,10 +164,24 @@ export function useMapPointerDrag(
     isDragging.value = false
   }
 
+  function clampPointerPosition(pointer: MapPointer) {
+    if (pointer.x == null || pointer.y == null) return
+
+    const width = pointer.width ?? 8
+    const height = pointer.height ?? 8
+
+    const maxX = 100 - width
+    const maxY = 100 - height
+
+    pointer.x = Math.max(0, Math.min(maxX, pointer.x))
+    pointer.y = Math.max(0, Math.min(maxY, pointer.y))
+  }
+
   useEventListener(window, "mousemove", handleMove)
   useEventListener(window, "mouseup", handleStop)
 
   return {
     startDrag,
+    clampPointerPosition,
   }
 }

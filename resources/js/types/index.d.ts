@@ -25,7 +25,6 @@ export interface MapPointer {
   placement?: Side
   offset?: number
   animate?: boolean
-  visible?: boolean
 }
 
 export type MapAssetCategory = "base" | "pointers"

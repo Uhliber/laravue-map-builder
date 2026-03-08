@@ -8,13 +8,34 @@ import BuilderLayout from "@/Layouts/BuilderLayout.vue"
 import Sidebar from "@/components/Sidebar.vue"
 import SidebarItem from "@/components/SidebarItem.vue"
 
-import { Layers, Map, MapPin } from "lucide-vue-next"
-import { Head } from "@inertiajs/vue3"
+import {
+  Layers,
+  Map,
+  MapPin,
+  MessageSquareMore,
+  MinusIcon,
+  PlusIcon,
+  Trash,
+} from "lucide-vue-next"
+import { Head, router } from "@inertiajs/vue3"
 
 import { useAssetsStore } from "@/stores/assets"
 import { MapAsset, MapPointer } from "@/types"
+import ButtonGroup from "@/components/ui/button-group/ButtonGroup.vue"
+import Switch from "@/components/ui/switch/Switch.vue"
+import { useScreen } from "@/composables/useScreen"
 
 const assetsStore = useAssetsStore()
+const { screenIsMobile } = useScreen()
+
+const formData = reactive({
+  base: null as null | {
+    id: string
+    src: string
+  },
+
+  pointers: [] as MapPointer[],
+})
 
 const sidebarOpen = ref(true)
 const openSections = ref<string[]>([])
@@ -24,15 +45,35 @@ const mapPointers = reactive<Record<string, MapPointer>>({})
 
 const mapContainer = ref<HTMLElement | null>(null)
 
+const selectedPointerId = ref<string | null>(null)
+
+const selectedPointer = computed(() =>
+  selectedPointerId.value ? mapPointers[selectedPointerId.value] : null,
+)
+
 const allAssets = computed<MapAsset[]>(() => [
   ...assetsStore.baseAssets,
   ...assetsStore.pointerAssets,
 ])
 
-const { startDrag } = useMapPointerDrag(mapContainer, mapPointers, allAssets)
+const { startDrag, clampPointerPosition } = useMapPointerDrag(
+  mapContainer,
+  mapPointers,
+  allAssets,
+)
 
 const baseElements = computed(() => assetsStore.baseAssets)
 const pointerSubcategories = computed(() => assetsStore.pointerSubcategories)
+
+const pointerAtMax = computed(() => {
+  if (!selectedPointer.value) return true
+  return (selectedPointer.value.width ?? 8) >= 16
+})
+
+const pointerAtMin = computed(() => {
+  if (!selectedPointer.value) return true
+  return (selectedPointer.value.width ?? 8) <= 4
+})
 
 function toggleSection(section: string): void {
   if (!sidebarOpen.value) {
@@ -58,12 +99,81 @@ watch(sidebarOpen, (open) => {
   if (!open) openSections.value = []
 })
 
+watch(
+  mapPointers,
+  () => {
+    formData.pointers = Object.values(mapPointers)
+  },
+  { deep: true },
+)
+
 onMounted(() => {
   assetsStore.fetchAssets()
 })
 
 function setBaseMap(asset: MapAsset): void {
   activeBaseMap.value = asset
+
+  formData.base = {
+    id: asset.id,
+    src: asset.src,
+  }
+}
+
+function clearSelection() {
+  selectedPointerId.value = null
+}
+
+function handleWorkspaceClick(event: MouseEvent) {
+  const target = event.target as HTMLElement
+
+  if (target.closest(".map-pointer")) {
+    return
+  }
+
+  selectedPointerId.value = null
+}
+
+function ensurePointerDefaults(pointer: MapPointer) {
+  if (pointer.width == null) pointer.width = 8
+  if (pointer.height == null) pointer.height = 8
+  if (!pointer.trigger) pointer.trigger = "disabled"
+}
+
+function toggleAnimate(pointer: MapPointer, val: boolean) {
+  pointer.animate = val
+}
+
+function toggleTooltip(pointer: MapPointer, val: boolean) {
+  pointer.trigger = val ? "hover" : "disabled"
+}
+
+function increasePointerSize(pointer: MapPointer) {
+  pointer.width = Math.min((pointer.width ?? 8) + 2, 16)
+  pointer.height = Math.min((pointer.height ?? 8) + 2, 16)
+
+  clampPointerPosition(pointer)
+}
+
+function decreasePointerSize(pointer: MapPointer) {
+  pointer.width = Math.max((pointer.width ?? 8) - 2, 4)
+  pointer.height = Math.max((pointer.height ?? 8) - 2, 4)
+
+  clampPointerPosition(pointer)
+}
+
+function removePointer(pointerId: string) {
+  if (!mapPointers[pointerId]) return
+
+  delete mapPointers[pointerId]
+
+  if (selectedPointerId.value === pointerId) {
+    selectedPointerId.value = null
+  }
+}
+
+function saveMap() {
+  router.post("/map-builder", formData)
 }
 </script>
 
@@ -76,7 +186,7 @@ function setBaseMap(asset: MapAsset): void {
 
       <div class="flex gap-4">
         <Button variant="outline">Preview</Button>
-        <Button type="submit">Save</Button>
+        <Button @click="saveMap">Save</Button>
       </div>
     </template>
 
@@ -142,10 +252,12 @@ function setBaseMap(asset: MapAsset): void {
       <!-- Workspace -->
       <main
         class="flex justify-center flex-1 bg-neutral-50 dark:bg-neutral-950 p-6 overflow-auto"
+        @click.self="clearSelection"
       >
         <div
           ref="mapContainer"
           class="relative w-full h-fit max-w-[780px] select-none"
+          @click="handleWorkspaceClick"
         >
           <img
             v-if="activeBaseMap"
@@ -155,12 +267,36 @@ function setBaseMap(asset: MapAsset): void {
           />
           <div
             v-else
-            class="bg-neutral-100 dark:bg-neutral-800/30 w-full h-auto rounded-lg aspect-square border block"
-          ></div>
+            class="grid justify-center items-center bg-neutral-100 dark:bg-neutral-800/30 w-full h-auto rounded-lg aspect-square border"
+          >
+            <div
+              class="pointer-events-none absolute inset-4 rounded-md border-2 border-dashed border-neutral-300/30 dark:border-neutral-800"
+            ></div>
+            <div
+              v-if="!Object.values(mapPointers).length"
+              class="max-w-md p-6 sm:p-16 text-center"
+            >
+              <h1 class="font-bold text-muted-foreground text-sm sm:text-base">
+                Start Building Your Map
+              </h1>
+              <p class="mt-2 text-muted-foreground/70 text-xs sm:text-sm">
+                To begin, select a base map from the sidebar. Once your base is
+                set, drag pointers onto the map to mark locations.
+              </p>
+              <p class="mt-2 text-muted-foreground/70 text-xs sm:text-sm">
+                Click a pointer to customize it. You can adjust its size, enable
+                animations, and configure a tooltip to add helpful information
+                or links for your users.
+              </p>
+            </div>
+          </div>
           <div
             v-for="pointer in Object.values(mapPointers)"
             :key="pointer.id"
-            class="absolute"
+            :class="[
+              'absolute map-pointer z-[1]',
+              selectedPointerId === pointer.id ? 'ring-2 ring-primary' : '',
+            ]"
             :style="{
               left: pointer.x + '%',
               top: pointer.y + '%',
@@ -169,8 +305,131 @@ function setBaseMap(asset: MapAsset): void {
             }"
             draggable="true"
             @mousedown="(e) => startDrag(pointer.id, e)"
+            @mouseup="
+              () => {
+                selectedPointerId = pointer.id
+                ensurePointerDefaults(pointer)
+              }
+            "
           >
             <img :src="pointer.src" class="w-full h-full min-w-max" />
+          </div>
+          <div
+            v-if="selectedPointer"
+            class="absolute"
+            :style="{
+              left: selectedPointer.x + '%',
+              top: selectedPointer.y + '%',
+              transform: `translateX(${-(screenIsMobile ? 40 : 60) + (selectedPointer.width ?? 8)}%) translatey(${screenIsMobile ? (selectedPointer.height ?? 8) * 4.5 : -50}%)`,
+            }"
+          >
+            <div class="grid items-center justify-items-end gap-2 pb-2">
+              <!-- Toolbar -->
+              <ButtonGroup @click.stop>
+                <ButtonGroup
+                  :orientation="screenIsMobile ? 'vertical' : 'horizontal'"
+                  aria-label="Pointer controls"
+                >
+                  <Button variant="dull" size="sm">
+                    Animate
+                    <Switch
+                      class="w-7 h-4"
+                      :model-value="selectedPointer.animate ?? false"
+                      @update:model-value="
+                        toggleAnimate(selectedPointer, $event)
+                      "
+                    />
+                  </Button>
+                  <Button variant="dull" size="sm">
+                    Tooltip
+                    <Switch
+                      class="w-7 h-4"
+                      :model-value="selectedPointer.trigger !== 'disabled'"
+                      @update:model-value="
+                        toggleTooltip(selectedPointer, $event)
+                      "
+                    />
+                  </Button>
+                  <Button
+                    v-if="!screenIsMobile"
+                    variant="outline"
+                    size="icon-sm"
+                    title="Open Tooltip Setting"
+                    :disabled="selectedPointer.trigger === 'disabled'"
+                  >
+                    <MessageSquareMore
+                      :class="{
+                        'tooltip-attention':
+                          selectedPointer.trigger !== 'disabled',
+                      }"
+                    />
+                  </Button>
+                </ButtonGroup>
+                <ButtonGroup v-if="!screenIsMobile">
+                  <Button
+                    variant="destructive"
+                    size="icon-sm"
+                    aria-label="Remove Pointer"
+                    title="Remove Pointer"
+                    @click="removePointer(selectedPointer.id)"
+                  >
+                    <Trash />
+                  </Button>
+                </ButtonGroup>
+              </ButtonGroup>
+
+              <ButtonGroup
+                :orientation="screenIsMobile ? 'horizontal' : 'vertical'"
+                aria-label="Pointer controls"
+                class="h-fit"
+                @click.stop
+              >
+                <Button
+                  v-if="screenIsMobile"
+                  variant="outline"
+                  size="icon-sm"
+                  title="Open Tooltip Setting"
+                  :disabled="selectedPointer.trigger === 'disabled'"
+                >
+                  <MessageSquareMore
+                    :class="{
+                      'tooltip-attention':
+                        selectedPointer.trigger !== 'disabled',
+                    }"
+                  />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  title="Increase Pointer Size"
+                  :disabled="pointerAtMax"
+                  @click="increasePointerSize(selectedPointer)"
+                >
+                  <PlusIcon />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  title="Decrease Pointer Size"
+                  :disabled="pointerAtMin"
+                  @click="decreasePointerSize(selectedPointer)"
+                >
+                  <MinusIcon />
+                </Button>
+
+                <Button
+                  v-if="screenIsMobile"
+                  variant="destructive"
+                  size="icon-sm"
+                  aria-label="Remove Pointer"
+                  title="Remove Pointer"
+                  @click="removePointer(selectedPointer.id)"
+                >
+                  <Trash />
+                </Button>
+              </ButtonGroup>
+            </div>
           </div>
         </div>
       </main>
