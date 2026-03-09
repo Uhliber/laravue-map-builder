@@ -80,6 +80,7 @@ class MapController extends Controller
                     'width' => $pointer['width'],
                     'height' => $pointer['height'],
                     'trigger' => $pointer['trigger'],
+                    'placement' => $pointer['placement'],
                     'animate' => $pointer['animate'] ?? false,
                     'asset_src' => $pointer['asset_src'] ?? $pointer['src'],
                     'title' => $pointer['title'] ?? null,

@@ -40,6 +40,7 @@ class MapBuilderController extends Controller
                         'width' => $p->width,
                         'height' => $p->height,
                         'trigger' => $p->trigger,
+                        'placement' => $p->placement,
                         'animate' => $p->animate,
                         'asset_src' => $p->asset_src,
                         'title' => $p->title,
