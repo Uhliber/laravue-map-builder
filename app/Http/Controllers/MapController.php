@@ -56,6 +56,45 @@ class MapController extends Controller
         ]);
     }
 
+    public function update(Request $request, $id)
+    {
+        $map = $request->user()->maps()->with('pointers')->findOrFail($id);
+
+        $validated = $request->validate([
+            'base.src' => ['required','string'],
+            'pointers' => ['array'],
+        ]);
+
+        DB::transaction(function () use ($map, $validated) {
+
+            $map->update([
+                'base_src' => $validated['base']['src'],
+            ]);
+
+            $map->pointers()->delete();
+
+            foreach ($validated['pointers'] ?? [] as $pointer) {
+                $map->pointers()->create([
+                    'x' => $pointer['x'],
+                    'y' => $pointer['y'],
+                    'width' => $pointer['width'],
+                    'height' => $pointer['height'],
+                    'trigger' => $pointer['trigger'],
+                    'animate' => $pointer['animate'] ?? false,
+                    'asset_src' => $pointer['asset_src'] ?? $pointer['src'],
+                    'title' => $pointer['title'] ?? null,
+                    'description' => $pointer['description'] ?? null,
+                    'link' => $pointer['link'] ?? null,
+                    'target' => $pointer['target'] ?? "_self" ?? null,
+                ]);
+            }
+        });
+
+        return Inertia::render('MapBuilderEdit', [
+            'map_id' => $map->id
+        ]);
+    }
+
     public function destroy(Map $map)
     {
         $this->authorize('delete', $map);

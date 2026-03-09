@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
+import { ref, onMounted, computed } from "vue"
 import { Head, router, usePage } from "@inertiajs/vue3"
 import { MapFormData, MapPreview } from "@/types"
 import MapBase from "@/components/MapBase.vue"
@@ -13,6 +13,7 @@ import {
 } from "lucide-vue-next"
 
 const STORAGE_KEY = "map-builder-formdata"
+const DRAFT_STORAGE_KEY = "map-edit-draft"
 
 const page = usePage()
 
@@ -21,13 +22,27 @@ const backendMap = page.props.map as MapPreview | undefined
 
 const layout = ref<"hero" | "split" | "fullscreen">("hero")
 
+const draftPreview = computed(() => {
+  const raw = localStorage.getItem(DRAFT_STORAGE_KEY)
+  if (!raw) return null
+
+  try {
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
+})
+
+const isDraftPreview = computed(() => {
+  return !!draftPreview.value?.id
+})
+
 function setLayout(l: "hero" | "split" | "fullscreen") {
   layout.value = l
 }
 
 function loadPreview() {
-  // CASE 1 - Backend preview (/map-preview/{id})
-
+  // CASE 1. Backend preview (/map-preview/{id})
   if (backendMap) {
     previewData.value = {
       base: { src: backendMap.base_src },
@@ -36,8 +51,37 @@ function loadPreview() {
     return
   }
 
-  // CASE 2 - Draft preview (/map-preview)
+  // CASE 2. Draft preview (prioritized)
+  const draftRaw = localStorage.getItem(DRAFT_STORAGE_KEY)
+
+  if (draftRaw) {
+    try {
+      const draft = JSON.parse(draftRaw)
+
+      const hasBase = draft?.base
+      const hasPointers =
+        Array.isArray(draft?.pointers) && draft.pointers.length > 0
+
+      if (!hasBase || !hasPointers) {
+        if (draft?.id) {
+          router.visit(`/map-builder/edit/${draft.id}`)
+        } else {
+          router.visit("/map-builder")
+        }
+        return
+      }
+
+      previewData.value = draft
+      return
+    } catch {
+      router.visit("/map-builder")
+      return
+    }
+  }
+
+  // CASE 3. Non-draft preview
   const raw = localStorage.getItem(STORAGE_KEY)
+
   if (!raw) {
     router.visit("/map-builder")
     return
@@ -45,14 +89,36 @@ function loadPreview() {
 
   try {
     const parsed = JSON.parse(raw)
-    if (!parsed || Object.keys(parsed).length === 0) {
+
+    const hasBase = parsed?.base
+    const hasPointers =
+      Array.isArray(parsed?.pointers) && parsed.pointers.length > 0
+
+    if (!hasBase || !hasPointers) {
       router.visit("/map-builder")
       return
     }
+
     previewData.value = parsed
   } catch {
     router.visit("/map-builder")
   }
+}
+
+function handleBack() {
+  console.log(backendMap, isDraftPreview)
+  // Backend preview
+  if (backendMap) {
+    router.visit("/dashboard")
+    return
+  }
+
+  if (isDraftPreview.value) {
+    router.visit(`/map-builder/edit/${draftPreview.value.id}`)
+    return
+  }
+
+  router.visit("/map-builder")
 }
 
 onMounted(loadPreview)
@@ -77,13 +143,14 @@ onMounted(loadPreview)
     >
       <!-- Back to builder -->
       <button
+        v-if="!isDraftPreview"
         class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-muted transition"
-        @click="router.visit(backendMap ? '/dashboard' : '/map-builder')"
+        @click="handleBack"
       >
         <CornerDownLeft class="w-5 h-5" />
       </button>
 
-      <div class="h-px bg-border"></div>
+      <div v-if="!isDraftPreview" class="h-px bg-border"></div>
 
       <!-- Layout 1 -->
       <button

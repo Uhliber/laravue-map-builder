@@ -155,7 +155,7 @@ onMounted(() => {
                   <div class="flex gap-2">
                     <!-- Edit -->
                     <Link
-                      :href="`/map-builder/${map.id}`"
+                      :href="`/map-builder/edit/${map.id}`"
                       class="flex-1"
                       @click.stop
                     >

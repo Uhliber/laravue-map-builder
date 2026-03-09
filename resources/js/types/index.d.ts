@@ -24,6 +24,7 @@ export interface MapPreview {
 }
 
 export interface MapFormData {
+  id?: number
   base: MapBaseAsset
   pointers: MapPointer[]
 }

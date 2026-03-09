@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import { computed, reactive, onMounted, ref, watch, nextTick } from "vue"
-import { debounce } from "lodash-es"
+import { computed, reactive, ref, onMounted, nextTick, watch } from "vue"
 import { toast } from "vue-sonner"
-
 import { useMapPointerDrag } from "@/composables/useMapPointerDrag"
-
-import ThemeToggle from "@/components/ThemeToggle.vue"
-import Button from "@/components/ui/button/Button.vue"
+import { Head, router, usePage } from "@inertiajs/vue3"
+import { useAssetsStore } from "@/stores/assets"
+import { useScreen } from "@/composables/useScreen"
+import TooltipSettingsDialog from "@/components/TooltipSettingsDialog.vue"
 import BuilderLayout from "@/Layouts/BuilderLayout.vue"
 import Sidebar from "@/components/Sidebar.vue"
 import SidebarItem from "@/components/SidebarItem.vue"
+import Button from "@/components/ui/button/Button.vue"
+import ThemeToggle from "@/components/ThemeToggle.vue"
+import ButtonGroup from "@/components/ui/button-group/ButtonGroup.vue"
+import Switch from "@/components/ui/switch/Switch.vue"
 
 import {
   Layers,
@@ -20,47 +23,38 @@ import {
   PlusIcon,
   Trash,
 } from "lucide-vue-next"
-import { Head, router } from "@inertiajs/vue3"
-
-import { useAssetsStore } from "@/stores/assets"
-import { MapAsset, MapPointer } from "@/types"
-import ButtonGroup from "@/components/ui/button-group/ButtonGroup.vue"
-import Switch from "@/components/ui/switch/Switch.vue"
-import { useScreen } from "@/composables/useScreen"
-import TooltipSettingsDialog from "@/components/TooltipSettingsDialog.vue"
+import { MapBaseAsset, MapFormData, MapPointer } from "@/types"
 
 const assetsStore = useAssetsStore()
 const { screenIsMobile } = useScreen()
+const page = usePage()
+const existingMap = page.props.map as MapFormData
 
 const formData = reactive({
-  base: null as null | {
-    id: string
-    src: string
-  },
-
-  pointers: [] as MapPointer[],
+  base: existingMap?.base ?? null,
+  pointers: existingMap?.pointers ?? [],
 })
 
-const sidebarOpen = ref(true)
-const openSections = ref<string[]>([])
-
-const activeBaseMap = ref<MapAsset | null>(null)
 const mapPointers = reactive<Record<string, MapPointer>>({})
-
+const activeBaseMap = ref(formData.base)
+const sidebarOpen = ref(true)
+const openSections = ref(["Base", "Pointers"])
 const mapContainer = ref<HTMLElement | null>(null)
-
 const selectedPointerId = ref<string | null>(null)
-
 const tooltipDialogOpen = ref(false)
 
 const selectedPointer = computed(() =>
   selectedPointerId.value ? mapPointers[selectedPointerId.value] : null,
 )
 
-const allAssets = computed<MapAsset[]>(() => [
-  ...assetsStore.baseAssets,
-  ...assetsStore.pointerAssets,
-])
+const { startDrag, clampPointerPosition } = useMapPointerDrag(
+  mapContainer,
+  mapPointers,
+  computed(() => [...assetsStore.baseAssets, ...assetsStore.pointerAssets]),
+)
+
+const baseElements = computed(() => assetsStore.baseAssets)
+const pointerSubcategories = computed(() => assetsStore.pointerSubcategories)
 
 const sortedPointers = computed(() => {
   const list = Object.values(mapPointers)
@@ -72,24 +66,24 @@ const sortedPointers = computed(() => {
   })
 })
 
-const { startDrag, clampPointerPosition } = useMapPointerDrag(
-  mapContainer,
-  mapPointers,
-  allAssets,
+const pointerAtMax = computed(() =>
+  selectedPointer.value ? (selectedPointer.value.width ?? 8) >= 24 : true,
+)
+const pointerAtMin = computed(() =>
+  selectedPointer.value ? (selectedPointer.value.width ?? 8) <= 4 : true,
 )
 
-const baseElements = computed(() => assetsStore.baseAssets)
-const pointerSubcategories = computed(() => assetsStore.pointerSubcategories)
-
-const pointerAtMax = computed(() => {
-  if (!selectedPointer.value) return true
-  return (selectedPointer.value.width ?? 8) >= 24
+watch(sidebarOpen, (open) => {
+  if (!open) openSections.value = []
 })
 
-const pointerAtMin = computed(() => {
-  if (!selectedPointer.value) return true
-  return (selectedPointer.value.width ?? 8) <= 4
-})
+watch(
+  mapPointers,
+  () => {
+    formData.pointers = Object.values(mapPointers)
+  },
+  { deep: true },
+)
 
 function toggleSection(section: string): void {
   if (!sidebarOpen.value) {
@@ -111,75 +105,9 @@ function toggleSection(section: string): void {
   }
 }
 
-const debouncedSave = debounce(saveToLocalStorage, 300)
-
-watch(sidebarOpen, (open) => {
-  if (!open) openSections.value = []
-})
-
-watch(
-  mapPointers,
-  () => {
-    formData.pointers = Object.values(mapPointers)
-  },
-  { deep: true },
-)
-
-watch(formData, () => debouncedSave(), { deep: true })
-
-onMounted(() => {
-  assetsStore.fetchAssets()
-
-  nextTick(() => {
-    loadFromLocalStorage()
-    openSections.value = ["Base", "Pointers"]
-  })
-})
-
-const STORAGE_KEY = "map-builder-formdata"
-
-function saveToLocalStorage() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(formData))
-}
-
-function loadFromLocalStorage() {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  if (!raw) return
-
-  try {
-    const parsed = JSON.parse(raw)
-
-    if (parsed?.base) formData.base = parsed.base
-    if (parsed?.pointers) formData.pointers = parsed.pointers
-
-    /**
-     * Restore workspace state
-     */
-    if (parsed?.base) {
-      const baseAsset = assetsStore.baseAssets.find(
-        (a) => a.id === parsed.base.id,
-      )
-
-      if (baseAsset) activeBaseMap.value = baseAsset
-    }
-
-    if (parsed?.pointers) {
-      parsed.pointers.forEach((p: MapPointer) => {
-        mapPointers[p.id] = p
-      })
-    }
-  } catch {
-    console.warn("Failed loading builder state")
-  }
-}
-
-function setBaseMap(asset: MapAsset): void {
+function setBaseMap(asset: MapBaseAsset) {
   activeBaseMap.value = asset
-
-  formData.base = {
-    id: asset.id,
-    src: asset.src,
-  }
+  formData.base = { id: asset.id, src: asset.src }
 }
 
 function clearSelection() {
@@ -187,19 +115,15 @@ function clearSelection() {
 }
 
 function handleWorkspaceClick(event: MouseEvent) {
-  const target = event.target as HTMLElement
-
-  if (target.closest(".map-pointer")) {
-    return
+  if (!(event.target as HTMLElement).closest(".map-pointer")) {
+    selectedPointerId.value = null
   }
-
-  selectedPointerId.value = null
 }
 
 function ensurePointerDefaults(pointer: MapPointer) {
-  if (pointer.width == null) pointer.width = 8
-  if (pointer.height == null) pointer.height = 8
-  if (!pointer.trigger) pointer.trigger = "disabled"
+  pointer.width ??= 8
+  pointer.height ??= 8
+  pointer.trigger ??= "disabled"
 }
 
 function toggleAnimate(pointer: MapPointer, val: boolean) {
@@ -213,28 +137,58 @@ function toggleTooltip(pointer: MapPointer, val: boolean) {
 function increasePointerSize(pointer: MapPointer) {
   pointer.width = Math.min((pointer.width ?? 8) + 2, 24)
   pointer.height = Math.min((pointer.height ?? 8) + 2, 24)
-
   clampPointerPosition(pointer)
 }
 
 function decreasePointerSize(pointer: MapPointer) {
   pointer.width = Math.max((pointer.width ?? 8) - 2, 4)
   pointer.height = Math.max((pointer.height ?? 8) - 2, 4)
-
   clampPointerPosition(pointer)
 }
 
 function removePointer(pointerId: string) {
-  if (!mapPointers[pointerId]) return
-
   delete mapPointers[pointerId]
-
-  if (selectedPointerId.value === pointerId) {
-    selectedPointerId.value = null
-  }
+  if (selectedPointerId.value === pointerId) selectedPointerId.value = null
 }
 
-function saveMap() {
+// track unsaved changes
+const initialState = JSON.stringify(formData)
+const hasUnsavedChanges = computed(
+  () => JSON.stringify(formData) !== initialState,
+)
+
+// warn on navigation
+window.addEventListener("beforeunload", (e) => {
+  if (hasUnsavedChanges.value) {
+    e.preventDefault()
+    e.returnValue = ""
+  }
+})
+
+function handlePreview() {
+  if (!formData.base || !formData.pointers.length) {
+    toast.error("Map is empty", {
+      description: "Add a base map and at least one pointer before preview.",
+      class:
+        "border border-destructive/30 shadow-md dark:!border-destructive/40 dark:!bg-neutral-800",
+    })
+    return
+  }
+
+  // Save draft for preview
+  localStorage.setItem(
+    `map-edit-draft`,
+    JSON.stringify({
+      id: existingMap.id,
+      base: formData.base,
+      pointers: formData.pointers,
+    }),
+  )
+
+  window.open("/map-preview", "_blank")
+}
+
+function updateMap() {
   if (!formData.base) {
     toast.error("Base map required", {
       description: "Select a base map before saving.",
@@ -253,18 +207,15 @@ function saveMap() {
     return
   }
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(formData))
-
-  router.post("/maps", formData, {
+  router.put(`/maps/${existingMap.id}`, formData, {
     preserveState: true,
     preserveScroll: true,
     onSuccess: (page) => {
-      // clear draft only after successful save
-      localStorage.removeItem(STORAGE_KEY)
+      localStorage.removeItem(`map-edit-draft`)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mapId = (page.props as any)?.map_id
 
-      const toastId = toast.loading("Map saved! Redirecting…", {
+      const toastId = toast.loading("Map updated! Redirecting…", {
         duration: 1800,
       })
 
@@ -277,43 +228,6 @@ function saveMap() {
   })
 }
 
-function handlePreview() {
-  localStorage.removeItem(`map-edit-draft`)
-  const raw = localStorage.getItem(STORAGE_KEY)
-
-  if (!raw) {
-    toast.error("Nothing to preview", {
-      description: "Build your map first before opening preview.",
-      class:
-        "border border-destructive/30 shadow-md dark:!border-destructive/40 dark:!bg-neutral-800",
-    })
-    return
-  }
-
-  try {
-    const parsed = JSON.parse(raw)
-
-    if (!parsed?.base || !parsed?.pointers?.length) {
-      toast.error("Map is empty", {
-        description:
-          "Please add a base map and at least one pointer before preview.",
-        class:
-          "border border-destructive/30 shadow-md dark:!border-destructive/40 dark:!bg-neutral-800",
-      })
-      return
-    }
-
-    saveToLocalStorage()
-    router.get("/map-preview")
-  } catch {
-    toast.error("Preview error", {
-      description: "Saved map data is corrupted.",
-      class:
-        "border border-destructive/30 shadow-md dark:!border-destructive/40 dark:!bg-neutral-800",
-    })
-  }
-}
-
 function openTooltipSettings() {
   if (!selectedPointer.value) return
   tooltipDialogOpen.value = true
@@ -321,9 +235,15 @@ function openTooltipSettings() {
 
 function updatePointerTooltip(data: MapPointer) {
   if (!selectedPointer.value) return
-
   Object.assign(selectedPointer.value, data)
 }
+
+onMounted(() => {
+  assetsStore.fetchAssets()
+  // restore pointers
+  formData.pointers.forEach((p) => (mapPointers[p.id] = p))
+  localStorage.removeItem(`map-edit-draft`)
+})
 </script>
 
 <template>
@@ -335,7 +255,7 @@ function updatePointerTooltip(data: MapPointer) {
 
       <div class="flex gap-4">
         <Button variant="outline" @click="handlePreview"> Preview </Button>
-        <Button @click="saveMap">Create</Button>
+        <Button @click="updateMap">Save</Button>
       </div>
     </template>
 
@@ -463,7 +383,10 @@ function updatePointerTooltip(data: MapPointer) {
               }
             "
           >
-            <img :src="pointer.src" class="w-full h-full" />
+            <img
+              :src="pointer.src ?? pointer.asset_src"
+              class="w-full h-full"
+            />
           </div>
           <div
             v-if="selectedPointer"

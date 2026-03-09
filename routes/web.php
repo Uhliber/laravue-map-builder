@@ -27,6 +27,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware(CheckMapLimit::class)
         ->name('map-builder');
 
+    Route::get('/map-builder/edit/{map}', [MapBuilderController::class, 'edit'])
+        ->name('map-builder.edit');
+
     Route::get('/map-preview', [MapBuilderController::class, 'preview'])
         ->name('map-preview');
 
@@ -37,6 +40,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::post('/maps', [MapController::class, 'store'])
     ->middleware('auth')
     ->name('maps.store');
+
+Route::put('/maps/{map}', [MapController::class, 'update'])
+    ->middleware(['auth','verified'])
+    ->name('maps.update');
 
 Route::delete('/maps/{map}', [MapController::class, 'destroy'])
     ->middleware(['auth','verified'])
