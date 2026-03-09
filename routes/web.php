@@ -5,6 +5,7 @@ use App\Http\Controllers\MapBuilderController;
 use App\Http\Controllers\MapController;
 use App\Http\Controllers\MapPreviewController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Middleware\CheckMapLimit;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -20,10 +21,10 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->middleware(['auth', 'verified'])
         ->name('dashboard');
 
     Route::get('/map-builder', [MapBuilderController::class, 'index'])
+        ->middleware(CheckMapLimit::class)
         ->name('map-builder');
 
     Route::get('/map-preview', [MapBuilderController::class, 'preview'])

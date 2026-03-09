@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Map;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class MapController extends Controller
 {
+
     public function store(Request $request)
     {
         $user = $request->user();
@@ -22,7 +24,6 @@ class MapController extends Controller
         ]);
 
         $map = DB::transaction(function () use ($data, $user) {
-
             $map = Map::create([
                 'user_id' => $user->id,
                 'base_src' => $data['base']['src']
@@ -50,7 +51,9 @@ class MapController extends Controller
             return $map;
         });
 
-        return redirect("/map-preview/{$map->id}");
+        return Inertia::render('MapBuilder', [
+            'map_id' => $map->id
+        ]);
     }
 
     public function destroy(Map $map)

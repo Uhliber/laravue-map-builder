@@ -6,6 +6,7 @@ import MapBase from "@/components/MapBase.vue"
 import ThemeToggle from "@/components/ThemeToggle.vue"
 import {
   CornerDownLeft,
+  Eye,
   Fullscreen,
   LayoutGrid,
   LayoutPanelLeft,
@@ -61,6 +62,15 @@ onMounted(loadPreview)
   <Head title="Map Preview" />
 
   <div class="min-h-screen bg-background flex flex-col relative">
+    <!-- Preview Mode Indicator -->
+    <div
+      v-if="!backendMap"
+      class="fixed left-16 top-16 -translate-y-1/2 z-50 px-3 py-1 rounded-xl bg-muted/40 backdrop-blur border shadow-lg text-lg font-semibold text-destructive flex items-center gap-2"
+    >
+      <Eye class="w-6 h-6" />
+      Preview Mode
+    </div>
+
     <!-- Floating Layout Switcher -->
     <div
       class="fixed right-5 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-2 bg-muted/40 backdrop-blur border rounded-xl p-2 shadow-lg"
