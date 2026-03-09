@@ -151,3 +151,4 @@ Automated build and deployment pipelines.
 - Public embeddable maps
 - Advanced pointer animations
 - Map templates
+- Support for custom map base images and custom pointer icons
