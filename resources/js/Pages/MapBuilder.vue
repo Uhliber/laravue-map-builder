@@ -254,11 +254,27 @@ function saveMap() {
   }
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(formData))
+  router.post("/maps", formData, {
+    preserveState: true,
+    preserveScroll: true,
+    only: [],
+    onSuccess: (page) => {
+      toast.success("Map saved", {
+        description: "Your map configuration was stored locally.",
+        class:
+          "border border-primary/30 shadow-md dark:!border-primary/40 dark:!bg-neutral-800",
+      })
 
-  toast.success("Map saved", {
-    description: "Your map configuration was stored locally.",
-    class:
-      "border border-primary/30 shadow-md dark:!border-primary/40 dark:!bg-neutral-800",
+      // clear draft only after successful save
+      localStorage.removeItem(STORAGE_KEY)
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mapId = (page.props as any)?.map_id
+
+      if (mapId) {
+        router.visit(`/map-preview/${mapId}`)
+      }
+    },
   })
 }
 

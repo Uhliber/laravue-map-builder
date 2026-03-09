@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MapBuilderController;
+use App\Http\Controllers\MapController;
+use App\Http\Controllers\MapPreviewController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -16,16 +19,27 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->middleware(['auth', 'verified'])
+        ->name('dashboard');
 
     Route::get('/map-builder', [MapBuilderController::class, 'index'])
         ->name('map-builder');
 
     Route::get('/map-preview', [MapBuilderController::class, 'preview'])
         ->name('map-preview');
+
+    Route::get('/map-preview/{id}', [MapPreviewController::class, 'show'])
+        ->name('map-preview.show');
 });
+
+Route::post('/maps', [MapController::class, 'store'])
+    ->middleware('auth')
+    ->name('maps.store');
+
+Route::delete('/maps/{map}', [MapController::class, 'destroy'])
+    ->middleware(['auth','verified'])
+    ->name('maps.destroy');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

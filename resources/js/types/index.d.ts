@@ -7,6 +7,22 @@ export interface User {
   email_verified_at?: string
 }
 
+export interface Map {
+  id: number
+  name: string
+  base_src: string
+  pointers_count: number
+  created_at: {
+    date: string
+    human: string
+  }
+}
+
+export interface MapPreview {
+  base_src: string
+  pointers: MapPointer[]
+}
+
 export interface MapFormData {
   base: MapBaseAsset
   pointers: MapPointer[]
@@ -16,6 +32,7 @@ export interface MapPointer {
   name: string
   category: string
   src?: string
+  asset_src?: string
   fileType: string
   x: number
   y: number
@@ -45,8 +62,8 @@ export type MapAsset = {
 }
 
 export type MapBaseAsset = {
-  id: string
-  src: string
+  id?: string
+  src?: string
   naturalWidth?: number
   naturalHeight?: number
 }

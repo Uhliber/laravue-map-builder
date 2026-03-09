@@ -27,6 +27,10 @@ const props = withDefaults(
 const arrow = ref<HTMLElement | null>(null)
 
 const pointerAssetPath = () => {
+  if (props.pointer.asset_src) {
+    return props.pointer.asset_src
+  }
+
   if (props.pointer.src) {
     return props.pointer.src
   }

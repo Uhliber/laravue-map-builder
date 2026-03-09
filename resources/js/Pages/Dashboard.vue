@@ -6,16 +6,43 @@ import CardDescription from "@/components/ui/card/CardDescription.vue"
 import CardHeader from "@/components/ui/card/CardHeader.vue"
 import CardTitle from "@/components/ui/card/CardTitle.vue"
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue"
-import { Head, Link } from "@inertiajs/vue3"
-import { Play, Plus } from "lucide-vue-next"
-import { onMounted, ref } from "vue"
+import ConfirmDialog from "@/components/ConfirmDialog.vue"
+import { Map } from "@/types"
+
+import { Head, Link, router, usePage } from "@inertiajs/vue3"
+
+import { Play, Plus, Eye, Pencil, Trash2 } from "lucide-vue-next"
+import { onMounted, ref, computed } from "vue"
+import { toast } from "vue-sonner"
+
+const { props } = usePage()
+
+const maps = props.maps as Map[]
 
 const hasDraftMap = ref(false)
 
+const MAP_LIMIT = 5
+
+const limitReached = computed(() => maps.length >= MAP_LIMIT)
+
+function deleteMap(id: number) {
+  router.delete(`/maps/${id}`, {
+    preserveScroll: true,
+    onSuccess: () => {
+      const index = maps.findIndex((m) => m.id === id)
+      if (index !== -1) maps.splice(index, 1)
+
+      toast("Map has been deleted", {
+        description: "The map and all pointers were removed successfully.",
+        class:
+          "border border-primary/30 shadow-md dark:!border-primary/40 dark:!bg-neutral-800",
+      })
+    },
+  })
+}
+
 onMounted(() => {
   const draft = localStorage.getItem("map-builder-formdata")
-
-  console.log(draft)
 
   if (draft) {
     try {
@@ -42,38 +69,102 @@ onMounted(() => {
     </template>
 
     <div class="py-12">
-      <div class="grid gap-4 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid gap-6 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <!-- Build Button -->
         <div class="flex justify-end">
-          <Link v-show="false" :href="route('map-builder')">
-            <Button type="button">
-              <Plus v-if="!hasDraftMap" class="text-primary-foreground"></Plus>
-              <Play v-else class="text-primary-foreground"></Play>
+          <Link v-if="!limitReached" :href="route('map-builder')">
+            <Button>
+              <Plus v-if="!hasDraftMap" class="mr-2 h-4 w-4" />
+              <Play v-else class="mr-2 h-4 w-4" />
               {{ hasDraftMap ? "Continue Building" : "Build Map" }}
             </Button>
           </Link>
+
+          <Button v-else disabled> Map limit reached (5) </Button>
         </div>
-        <Card class="py-10">
+
+        <!-- EMPTY STATE -->
+        <Card v-if="maps.length === 0" class="py-10">
           <CardHeader>
             <CardTitle class="text-center">Create your first map</CardTitle>
+
             <CardDescription class="text-center">
               You do not have any maps yet. Click the button below and start
               building!
             </CardDescription>
           </CardHeader>
 
-          <CardContent class="w-full flex justify-center">
+          <CardContent class="flex justify-center">
             <Link :href="route('map-builder')">
-              <Button type="button">
-                <Plus
-                  v-if="!hasDraftMap"
-                  class="text-primary-foreground"
-                ></Plus>
-                <Play v-else class="text-primary-foreground"></Play>
+              <Button>
+                <Plus v-if="!hasDraftMap" class="mr-2 h-4 w-4" />
+                <Play v-else class="mr-2 h-4 w-4" />
                 {{ hasDraftMap ? "Continue Building" : "Build Map" }}
               </Button>
             </Link>
           </CardContent>
         </Card>
+
+        <!-- MAP GRID -->
+        <div v-else class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <Card
+            v-for="(map, i) in maps"
+            :key="map.id"
+            class="overflow-hidden group hover:shadow-lg transition-all duration-300 opacity-0 animate-fade-in"
+            :style="{ animationDelay: `${i * 80}ms` }"
+          >
+            <!-- map preview -->
+            <div class="aspect-video bg-muted overflow-hidden">
+              <img
+                :src="map.base_src"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+
+            <CardContent class="space-y-4 pt-4">
+              <!-- metadata -->
+              <div class="text-sm text-muted-foreground space-y-1">
+                <div class="font-semibold text-lg">
+                  {{ map.pointers_count }} pointers
+                </div>
+
+                <span :title="map.created_at.date">
+                  {{ map.created_at.human }}
+                </span>
+              </div>
+
+              <!-- actions -->
+              <div class="flex gap-2">
+                <Link :href="`/map-preview/${map.id}`" class="flex-1">
+                  <Button size="sm" variant="secondary" class="w-full">
+                    <Eye class="mr-2 h-4 w-4" />
+                    Preview
+                  </Button>
+                </Link>
+
+                <Link :href="`/map-builder/${map.id}`" class="flex-1">
+                  <Button size="sm" variant="outline" class="w-full">
+                    <Pencil class="mr-2 h-4 w-4" />
+                    Edit
+                  </Button>
+                </Link>
+
+                <ConfirmDialog
+                  title="Delete this map?"
+                  description="This action cannot be undone. The map and all pointers will be permanently removed."
+                  confirm-text="Delete map"
+                  cancel-text="Cancel"
+                  confirm-variant="destructive"
+                  @confirm="deleteMap(map.id)"
+                >
+                  <Button size="sm" variant="destructive">
+                    <Trash2 class="h-4 w-4" />
+                  </Button>
+                </ConfirmDialog>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   </AuthenticatedLayout>

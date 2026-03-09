@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue"
-import { Head, router } from "@inertiajs/vue3"
-import { MapFormData } from "@/types"
+import { Head, router, usePage } from "@inertiajs/vue3"
+import { MapFormData, MapPreview } from "@/types"
 import MapBase from "@/components/MapBase.vue"
 import ThemeToggle from "@/components/ThemeToggle.vue"
 import {
@@ -13,7 +13,10 @@ import {
 
 const STORAGE_KEY = "map-builder-formdata"
 
+const page = usePage()
+
 const previewData = ref<MapFormData | null>(null)
+const backendMap = page.props.map as MapPreview | undefined
 
 const layout = ref<"hero" | "split" | "fullscreen">("hero")
 
@@ -21,9 +24,19 @@ function setLayout(l: "hero" | "split" | "fullscreen") {
   layout.value = l
 }
 
-async function loadPreview() {
-  const raw = localStorage.getItem(STORAGE_KEY)
+function loadPreview() {
+  // CASE 1 - Backend preview (/map-preview/{id})
 
+  if (backendMap) {
+    previewData.value = {
+      base: { src: backendMap.base_src },
+      pointers: backendMap.pointers,
+    }
+    return
+  }
+
+  // CASE 2 - Draft preview (/map-preview)
+  const raw = localStorage.getItem(STORAGE_KEY)
   if (!raw) {
     router.visit("/map-builder")
     return
@@ -31,21 +44,17 @@ async function loadPreview() {
 
   try {
     const parsed = JSON.parse(raw)
-
     if (!parsed || Object.keys(parsed).length === 0) {
       router.visit("/map-builder")
       return
     }
-
     previewData.value = parsed
   } catch {
     router.visit("/map-builder")
   }
 }
 
-onMounted(() => {
-  loadPreview()
-})
+onMounted(loadPreview)
 </script>
 
 <template>
@@ -59,7 +68,7 @@ onMounted(() => {
       <!-- Back to builder -->
       <button
         class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-muted transition"
-        @click="router.visit('/map-builder')"
+        @click="router.visit(backendMap ? '/dashboard' : '/map-builder')"
       >
         <CornerDownLeft class="w-5 h-5" />
       </button>

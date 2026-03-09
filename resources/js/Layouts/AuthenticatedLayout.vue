@@ -7,11 +7,13 @@ import NavLink from "@/components/NavLink.vue"
 import ResponsiveNavLink from "@/components/ResponsiveNavLink.vue"
 import { Link } from "@inertiajs/vue3"
 import ThemeToggle from "@/components/ThemeToggle.vue"
+import { Toaster } from "vue-sonner"
 
 const showingNavigationDropdown = ref(false)
 </script>
 
 <template>
+  <Toaster position="top-center" richColors />
   <div>
     <div class="min-h-screen">
       <nav class="border-b border-neutral-100 dark:border-neutral-800">
