@@ -25,15 +25,15 @@ const MAP_LIMIT = 5
 
 const limitReached = computed(() => maps.length >= MAP_LIMIT)
 
-function deleteMap(id: number) {
+function handleDelete(id: number) {
   router.delete(`/maps/${id}`, {
     preserveScroll: true,
     onSuccess: () => {
       const index = maps.findIndex((m) => m.id === id)
-      if (index !== -1) maps.splice(index, 1)
+      if (index > -1) maps.splice(index, 1)
 
-      toast("Map has been deleted", {
-        description: "The map and all pointers were removed successfully.",
+      toast.success("Map deleted", {
+        description: "The map has been successfully removed.",
         class:
           "border border-primary/30 shadow-md dark:!border-primary/40 dark:!bg-neutral-800",
       })
@@ -106,64 +106,83 @@ onMounted(() => {
         </Card>
 
         <!-- MAP GRID -->
-        <div v-else class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <Card
-            v-for="(map, i) in maps"
-            :key="map.id"
-            class="overflow-hidden group hover:shadow-lg transition-all duration-300 opacity-0 animate-fade-in"
-            :style="{ animationDelay: `${i * 80}ms` }"
+        <div v-else>
+          <TransitionGroup
+            name="fade"
+            tag="div"
+            class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
           >
-            <!-- map preview -->
-            <div class="aspect-video bg-muted overflow-hidden">
-              <img
-                :src="map.base_src"
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            </div>
+            <div
+              v-for="(map, i) in maps"
+              :key="map.id"
+              class="opacity-0 animate-fade-in"
+              :style="{ animationDelay: `${i * 80}ms` }"
+            >
+              <Card
+                class="overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer"
+                @click="router.visit(`/map-preview/${map.id}`)"
+              >
+                <!-- map preview -->
+                <div
+                  class="relative aspect-video bg-muted overflow-hidden group"
+                >
+                  <img
+                    :src="map.base_src"
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
 
-            <CardContent class="space-y-4 pt-4">
-              <!-- metadata -->
-              <div class="text-sm text-muted-foreground space-y-1">
-                <div class="font-semibold text-lg">
-                  {{ map.pointers_count }} pointers
+                  <!-- Floating preview indicator -->
+                  <div
+                    class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full bg-white/70 text-primary-foreground shadow-md transition-all opacity-0 group-hover:opacity-100"
+                    title="Preview Map"
+                  >
+                    <Eye class="w-4 h-4" />
+                  </div>
                 </div>
 
-                <span :title="map.created_at.date">
-                  {{ map.created_at.human }}
-                </span>
-              </div>
+                <CardContent class="space-y-4 pt-4">
+                  <!-- metadata -->
+                  <div class="text-sm text-muted-foreground space-y-1">
+                    <div class="font-semibold text-lg">
+                      {{ map.pointers_count }} pointers
+                    </div>
+                    <span :title="map.created_at.date">{{
+                      map.created_at.human
+                    }}</span>
+                  </div>
 
-              <!-- actions -->
-              <div class="flex gap-2">
-                <Link :href="`/map-preview/${map.id}`" class="flex-1">
-                  <Button size="sm" variant="secondary" class="w-full">
-                    <Eye class="mr-2 h-4 w-4" />
-                    Preview
-                  </Button>
-                </Link>
+                  <!-- actions -->
+                  <div class="flex gap-2">
+                    <!-- Edit -->
+                    <Link
+                      :href="`/map-builder/${map.id}`"
+                      class="flex-1"
+                      @click.stop
+                    >
+                      <Button size="sm" variant="outline" class="w-full">
+                        <Pencil class="mr-2 h-4 w-4" />
+                        Edit
+                      </Button>
+                    </Link>
 
-                <Link :href="`/map-builder/${map.id}`" class="flex-1">
-                  <Button size="sm" variant="outline" class="w-full">
-                    <Pencil class="mr-2 h-4 w-4" />
-                    Edit
-                  </Button>
-                </Link>
-
-                <ConfirmDialog
-                  title="Delete this map?"
-                  description="This action cannot be undone. The map and all pointers will be permanently removed."
-                  confirm-text="Delete map"
-                  cancel-text="Cancel"
-                  confirm-variant="destructive"
-                  @confirm="deleteMap(map.id)"
-                >
-                  <Button size="sm" variant="destructive">
-                    <Trash2 class="h-4 w-4" />
-                  </Button>
-                </ConfirmDialog>
-              </div>
-            </CardContent>
-          </Card>
+                    <!-- Delete -->
+                    <ConfirmDialog
+                      title="Delete this map?"
+                      description="This action cannot be undone. The map and all pointers will be permanently removed."
+                      confirm-text="Delete map"
+                      cancel-text="Cancel"
+                      confirm-variant="destructive"
+                      @confirm="handleDelete(map.id)"
+                    >
+                      <Button size="sm" variant="destructive" @click.stop>
+                        <Trash2 class="h-4 w-4" />
+                      </Button>
+                    </ConfirmDialog>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TransitionGroup>
         </div>
       </div>
     </div>

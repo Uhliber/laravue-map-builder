@@ -160,6 +160,29 @@ body {
   }
 }
 
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-leave-active {
+  transition: all 0.3s ease;
+}
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
 .animate-fade-in {
   animation: fade-in 0.45s ease forwards;
 }

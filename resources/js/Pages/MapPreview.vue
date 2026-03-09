@@ -112,13 +112,25 @@ onMounted(loadPreview)
     <!-- ================= HERO LAYOUT ================= -->
     <div
       v-if="layout === 'hero'"
-      class="flex flex-col items-center px-6 py-16 gap-14"
+      class="flex flex-col items-center px-6 py-10 gap-8"
     >
       <!-- Headline -->
-      <div class="text-center max-w-2xl space-y-4">
-        <div class="h-10 w-80 mx-auto bg-muted rounded"></div>
-        <div class="h-4 w-72 mx-auto bg-muted/60 rounded"></div>
-        <div class="h-4 w-64 mx-auto bg-muted/60 rounded"></div>
+      <div
+        class="flex items-center justify-between w-full max-w-5xl mx-auto mb-6"
+      >
+        <div class="flex items-center space-x-3">
+          <div class="h-10 w-10 bg-muted rounded-full"></div>
+          <div class="flex flex-col">
+            <div class="h-4 w-24 bg-muted/80 rounded"></div>
+            <div class="h-3 w-16 bg-muted/60 rounded mt-1"></div>
+          </div>
+        </div>
+
+        <div class="flex gap-4">
+          <div class="h-8 w-16 bg-muted/70 rounded"></div>
+          <div class="h-8 w-16 bg-muted/60 rounded"></div>
+          <div class="h-8 w-16 bg-muted/70 rounded"></div>
+        </div>
       </div>
 
       <!-- Map Hero -->
