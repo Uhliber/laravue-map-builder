@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { computed, reactive, ref, onMounted, nextTick, watch } from "vue"
+import {
+  computed,
+  reactive,
+  ref,
+  onMounted,
+  nextTick,
+  watch,
+  onBeforeUnmount,
+} from "vue"
 import { toast } from "vue-sonner"
 import { useMapPointerDrag } from "@/composables/useMapPointerDrag"
 import { Head, router, usePage } from "@inertiajs/vue3"
@@ -24,6 +32,12 @@ import {
   Trash,
 } from "lucide-vue-next"
 import { MapBaseAsset, MapFormData, MapPointer } from "@/types"
+import AlertDialog from "@/components/ui/alert-dialog/AlertDialog.vue"
+import AlertDialogContent from "@/components/ui/alert-dialog/AlertDialogContent.vue"
+import AlertDialogHeader from "@/components/ui/alert-dialog/AlertDialogHeader.vue"
+import AlertDialogTitle from "@/components/ui/alert-dialog/AlertDialogTitle.vue"
+import AlertDialogDescription from "@/components/ui/alert-dialog/AlertDialogDescription.vue"
+import AlertDialogFooter from "@/components/ui/alert-dialog/AlertDialogFooter.vue"
 
 const assetsStore = useAssetsStore()
 const { screenIsMobile } = useScreen()
@@ -42,6 +56,10 @@ const openSections = ref(["Base", "Pointers"])
 const mapContainer = ref<HTMLElement | null>(null)
 const selectedPointerId = ref<string | null>(null)
 const tooltipDialogOpen = ref(false)
+
+// track pending navigation
+const showUnsavedDialog = ref(false)
+const pendingNavigation = ref<Function | null>(null)
 
 const selectedPointer = computed(() =>
   selectedPointerId.value ? mapPointers[selectedPointerId.value] : null,
@@ -157,13 +175,13 @@ const hasUnsavedChanges = computed(
   () => JSON.stringify(formData) !== initialState,
 )
 
-// warn on navigation
-window.addEventListener("beforeunload", (e) => {
+// native browser warning
+const handleBeforeUnload = (e: BeforeUnloadEvent) => {
   if (hasUnsavedChanges.value) {
     e.preventDefault()
     e.returnValue = ""
   }
-})
+}
 
 function handlePreview() {
   if (!formData.base || !formData.pointers.length) {
@@ -238,18 +256,35 @@ function updatePointerTooltip(data: MapPointer) {
   Object.assign(selectedPointer.value, data)
 }
 
+function attemptNavigation(callback: Function) {
+  pendingNavigation.value = callback
+  showUnsavedDialog.value = true
+}
+
+function confirmLeave() {
+  if (pendingNavigation.value) pendingNavigation.value()
+}
+
 onMounted(() => {
   assetsStore.fetchAssets()
   // restore pointers
   formData.pointers.forEach((p) => (mapPointers[p.id] = p))
   localStorage.removeItem(`map-edit-draft`)
+  window.addEventListener("beforeunload", handleBeforeUnload)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener("beforeunload", handleBeforeUnload)
 })
 </script>
 
 <template>
   <Head title="Builder" />
 
-  <BuilderLayout>
+  <BuilderLayout
+    :hasUnsavedChanges="hasUnsavedChanges"
+    @confirm-navigation="(callback) => attemptNavigation(callback)"
+  >
     <template #actions>
       <ThemeToggle />
 
@@ -512,6 +547,24 @@ onMounted(() => {
         </div>
       </main>
     </div>
+
+    <AlertDialog :open="showUnsavedDialog">
+      <AlertDialogContent class="border-destructive">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+          <AlertDialogDescription>
+            You have unsaved changes. Are you sure you want to leave?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <Button variant="secondary" @click="() => (showUnsavedDialog = false)"
+            >Cancel</Button
+          >
+          <Button variant="destructive" @click="confirmLeave()"> Leave </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
     <TooltipSettingsDialog
       v-model:open="tooltipDialogOpen"
       :pointer="selectedPointer"

@@ -1,9 +1,22 @@
 <script setup lang="ts">
-import { Link } from "@inertiajs/vue3"
+import { Link, router } from "@inertiajs/vue3"
 import { House } from "lucide-vue-next"
 
 import "vue-sonner/style.css"
 import { Toaster } from "vue-sonner"
+
+const props = defineProps({
+  hasUnsavedChanges: { type: Boolean, default: false },
+})
+const emit = defineEmits(["confirm-navigation"])
+
+function handleBackClick() {
+  if (props.hasUnsavedChanges) {
+    emit("confirm-navigation", () => router.visit("/dashboard"))
+  } else {
+    router.visit("/dashboard")
+  }
+}
 </script>
 
 <template>
@@ -17,9 +30,16 @@ import { Toaster } from "vue-sonner"
             <div class="flex">
               <!-- Logo -->
               <div class="flex shrink-0 items-center">
-                <Link :href="route('dashboard')">
+                <div
+                  class="cursor-pointer"
+                  tabindex="1"
+                  @keypress.enter="handleBackClick"
+                  title="Go to Dashboard"
+                  aria-label="Go to Dashboard"
+                  @click="handleBackClick"
+                >
                   <House class="text-primary w-8 h-8" />
-                </Link>
+                </div>
               </div>
             </div>
 
