@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link, router } from "@inertiajs/vue3"
+import { router } from "@inertiajs/vue3"
 import { House } from "lucide-vue-next"
 
 import "vue-sonner/style.css"
