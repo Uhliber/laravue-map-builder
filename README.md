@@ -1,59 +1,153 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🗺️ Map Builder
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Live Demo:** [LaraVue Map Builder](https://laravue-map-builder-production.up.railway.app/)
 
-## About Laravel
+![Map Builder Screenshot 1](https://github.com/user-attachments/assets/78c4a1f7-4f5b-4ad7-b424-7dc004094b19)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+![Map Builder Screenshot 2](https://github.com/user-attachments/assets/bb10e892-5867-43b0-be3c-ad9da9d63fc1)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Map Builder is a web application that allows users to create **interactive maps for websites**.  
+It helps site owners visually guide their users by placing interactive markers on a map and attaching content, links, and actions to each location.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Users can build maps with a **drag-and-drop interface**, preview them instantly, and manage their existing maps from a dashboard.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+# 🚀 Tech Stack
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Frontend
+- Vue.js
+- TypeScript
+- TailwindCSS
+- Shadcn
 
-## Laravel Sponsors
+### Backend
+- Laravel
+- Inertia.js
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Database
+- PostgreSQL
 
-### Premium Partners
+### Deployment
+- Railway
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+---
 
-## Contributing
+# ✨ Core Features
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Interactive Map Builder
+Create fully interactive maps using a visual editor.
 
-## Code of Conduct
+- Drag and drop map markers
+- Resize and position map pointers
+- Attach titles, descriptions, and links to markers
+- Preview maps before saving
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Map Display
+Render interactive maps that allow users to explore your website visually.
 
-## Security Vulnerabilities
+- Clickable markers
+- Interactive tooltips
+- Optional external links
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Manage Existing Maps
+A dashboard for managing maps you have created.
 
-## License
+- View all created maps
+- Edit existing maps
+- Preview maps
+- Delete maps
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Drag and Drop Interface
+Markers can be positioned directly on the map using a smooth drag-and-drop experience.
+
+## Map Pointer Toolbar
+Each marker includes an intuitive toolbar for:
+
+- Editing content
+- Adjusting pointer settings
+- Enabling animations
+- Linking to external pages
+
+## Authentication
+User accounts allow maps to be securely saved and managed.
+
+## Dark Mode
+Full dark mode support for comfortable editing in low-light environments.
+
+---
+
+# 🧭 Use Cases
+
+Map Builder can be used for:
+
+- Website navigation maps
+- Interactive documentation
+- SaaS onboarding flows
+- Product walkthrough maps
+- Game-style exploration interfaces
+
+---
+
+# 🛠️ Local Development
+
+Clone the repository
+
+```bash
+git clone https://github.com/yourusername/map-builder.git
+cd map-builder
+```
+
+Install backend dependencies
+
+```bash
+composer install
+```
+
+Install frontend dependencies
+
+```bash
+npm install
+```
+
+Run development servers
+
+```bash
+php artisan serve
+npm run dev
+```
+
+Run database migrations
+
+```bash
+php artisan migrate
+```
+
+---
+
+# 📦 Deployment
+
+This project is deployed using **Railway**, which handles:
+
+- Laravel hosting
+- PostgreSQL database
+- Environment configuration
+- Automatic deployments
+
+---
+
+# 🔮 Upcoming Improvements
+
+### CI/CD Integration
+Automated build and deployment pipelines.
+
+### Automated Testing
+- Unit testing
+- End-to-end (E2E) testing
+- Integration testing
+
+### Additional Features
+- Map sharing
+- Public embeddable maps
+- Advanced pointer animations
+- Map templates
