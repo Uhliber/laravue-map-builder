@@ -38,6 +38,7 @@ import AlertDialogHeader from "@/components/ui/alert-dialog/AlertDialogHeader.vu
 import AlertDialogTitle from "@/components/ui/alert-dialog/AlertDialogTitle.vue"
 import AlertDialogDescription from "@/components/ui/alert-dialog/AlertDialogDescription.vue"
 import AlertDialogFooter from "@/components/ui/alert-dialog/AlertDialogFooter.vue"
+import Spinner from "@/components/ui/spinner/Spinner.vue"
 
 const assetsStore = useAssetsStore()
 const { screenIsMobile } = useScreen()
@@ -51,6 +52,7 @@ const formData = reactive({
 
 const mapPointers = reactive<Record<string, MapPointer>>({})
 const activeBaseMap = ref(formData.base)
+const isLoading = ref(false)
 const sidebarOpen = ref(true)
 const openSections = ref(["Base", "Pointers"])
 const mapContainer = ref<HTMLElement | null>(null)
@@ -225,6 +227,8 @@ function updateMap() {
     return
   }
 
+  isLoading.value = true
+
   router.put(`/maps/${existingMap.id}`, formData, {
     preserveState: true,
     preserveScroll: true,
@@ -290,7 +294,9 @@ onBeforeUnmount(() => {
 
       <div class="flex gap-4">
         <Button variant="outline" @click="handlePreview"> Preview </Button>
-        <Button @click="updateMap">Save</Button>
+        <Button @click="updateMap" :disabled="isLoading">
+          <Spinner v-if="isLoading" /> Save</Button
+        >
       </div>
     </template>
 

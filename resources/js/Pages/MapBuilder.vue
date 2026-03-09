@@ -28,6 +28,7 @@ import ButtonGroup from "@/components/ui/button-group/ButtonGroup.vue"
 import Switch from "@/components/ui/switch/Switch.vue"
 import { useScreen } from "@/composables/useScreen"
 import TooltipSettingsDialog from "@/components/TooltipSettingsDialog.vue"
+import Spinner from "@/components/ui/spinner/Spinner.vue"
 
 const assetsStore = useAssetsStore()
 const { screenIsMobile } = useScreen()
@@ -46,7 +47,7 @@ const openSections = ref<string[]>([])
 
 const activeBaseMap = ref<MapAsset | null>(null)
 const mapPointers = reactive<Record<string, MapPointer>>({})
-
+const isLoading = ref(false)
 const mapContainer = ref<HTMLElement | null>(null)
 
 const selectedPointerId = ref<string | null>(null)
@@ -254,6 +255,7 @@ function saveMap() {
   }
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(formData))
+  isLoading.value = true
 
   router.post("/maps", formData, {
     preserveState: true,
@@ -335,7 +337,9 @@ function updatePointerTooltip(data: MapPointer) {
 
       <div class="flex gap-4">
         <Button variant="outline" @click="handlePreview"> Preview </Button>
-        <Button @click="saveMap">Create</Button>
+        <Button @click="saveMap" :disabled="isLoading">
+          <Spinner v-if="isLoading" /> Create</Button
+        >
       </div>
     </template>
 
