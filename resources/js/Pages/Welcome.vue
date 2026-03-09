@@ -9,7 +9,7 @@ import { useScreen } from "@/composables/useScreen"
 import MapBase from "@/components/MapBase.vue"
 import {
   demoMapBaseImage,
-  demoPointers,
+  demoPointers as originalDemoPointers,
   demoHighlightPointer,
 } from "@/demo/mapDemo"
 import MapPointer from "@/components/MapPointer.vue"
@@ -26,9 +26,16 @@ const page = usePage<PageProps>()
 const { screenIs } = useScreen()
 const mapHighlightVisible = ref(false)
 
-const authorUrl = computed<string>(() => {
-  return (page.props?.author_url as string) ?? "/"
-})
+const authorUrl = computed(() => (page.props.author_url as string) ?? "/")
+
+// Deep clone pointers so we can mutate safely
+const demoPointers = originalDemoPointers.map((p) => ({ ...p }))
+
+// Update ollie-stand pointer dynamically
+const olliePointer = demoPointers.find((p) => p.id === "ollie-stand")
+if (olliePointer) {
+  olliePointer.link = authorUrl.value as string
+}
 
 function onMapLoaded() {
   mapHighlightVisible.value = true

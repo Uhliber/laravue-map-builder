@@ -71,7 +71,7 @@ onMounted(() => {
     <div class="py-12">
       <div class="grid gap-6 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <!-- Build Button -->
-        <div class="flex justify-end">
+        <div v-if="maps.length !== 0" class="flex justify-end">
           <Link v-if="!limitReached" :href="route('map-builder')">
             <Button>
               <Plus v-if="!hasDraftMap" class="mr-2 h-4 w-4" />
