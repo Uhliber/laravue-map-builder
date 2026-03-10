@@ -14,6 +14,7 @@ import {
 } from "@/demo/mapDemo"
 import MapPointer from "@/components/MapPointer.vue"
 import MapPointerContent from "@/components/MapPointerContent.vue"
+import ApplicationLogo from "@/components/ApplicationLogo.vue"
 
 defineProps<{
   canLogin?: boolean
@@ -63,19 +64,12 @@ function onMapLoaded() {
         class="relative w-full max-w-2xl px-6 lg:max-w-7xl flex flex-col min-h-[100dvh]"
       >
         <!-- Header -->
-        <header
-          class="grid grid-cols-2 items-center gap-2 py-10 shrink-0 lg:grid-cols-3"
-        >
-          <Link
-            href="/"
-            class="flex items-center lg:col-start-2 lg:justify-center text-nowrap"
-          >
-            <div
-              class="flex gap-2 items-center font-bebas text-2xl sm:text-4xl text-primary"
-            >
-              Map Builder
-              <MapPinPen class="text-primary w-5 h-5 lg:w-7 lg:h-7 mb-1" />
-            </div>
+        <header class="grid grid-cols-2 items-center gap-2 py-10 shrink-0">
+          <Link href="/">
+            <ApplicationLogo
+              class="block w-auto fill-current"
+              direction="horizontal"
+            />
           </Link>
 
           <nav v-if="canLogin" class="-mx-3 flex flex-1 justify-end">

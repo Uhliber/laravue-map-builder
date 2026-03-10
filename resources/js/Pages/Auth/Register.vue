@@ -20,6 +20,9 @@ import {
 
 import { Input } from "@/components/ui/input"
 import InputError from "@/components/InputError.vue"
+import Alert from "@/components/ui/alert/Alert.vue"
+import AlertTitle from "@/components/ui/alert/AlertTitle.vue"
+import AlertDescription from "@/components/ui/alert/AlertDescription.vue"
 
 const form = useForm({
   name: "",
@@ -41,8 +44,15 @@ const submit = () => {
   <GuestLayout>
     <Head title="Register" />
 
-    <div class="flex justify-center">
-      <Card class="w-full max-w-md">
+    <div class="grid gap-4 w-full max-w-sm">
+      <Alert>
+        <AlertTitle class="text-destructive">Demo Mode</AlertTitle>
+        <AlertDescription>
+          In Demo Mode, you can sign up with any email and password. No
+          verification is required.
+        </AlertDescription>
+      </Alert>
+      <Card>
         <CardHeader>
           <CardTitle>Create an account</CardTitle>
           <CardDescription>
@@ -53,11 +63,8 @@ const submit = () => {
         <CardContent>
           <form @submit.prevent="submit">
             <FieldGroup>
-
               <Field>
-                <FieldLabel for="name">
-                  Full Name
-                </FieldLabel>
+                <FieldLabel for="name"> Full Name </FieldLabel>
 
                 <Input
                   id="name"
@@ -72,11 +79,8 @@ const submit = () => {
                 <InputError :message="form.errors.name" />
               </Field>
 
-
               <Field>
-                <FieldLabel for="email">
-                  Email
-                </FieldLabel>
+                <FieldLabel for="email"> Email </FieldLabel>
 
                 <Input
                   id="email"
@@ -94,11 +98,8 @@ const submit = () => {
                 <InputError :message="form.errors.email" />
               </Field>
 
-
               <Field>
-                <FieldLabel for="password">
-                  Password
-                </FieldLabel>
+                <FieldLabel for="password"> Password </FieldLabel>
 
                 <Input
                   id="password"
@@ -114,7 +115,6 @@ const submit = () => {
 
                 <InputError :message="form.errors.password" />
               </Field>
-
 
               <Field>
                 <FieldLabel for="password_confirmation">
@@ -136,7 +136,6 @@ const submit = () => {
                 <InputError :message="form.errors.password_confirmation" />
               </Field>
 
-
               <FieldGroup class="pt-4 space-y-3">
                 <Button
                   type="submit"
@@ -156,7 +155,6 @@ const submit = () => {
                   </Link>
                 </FieldDescription>
               </FieldGroup>
-
             </FieldGroup>
           </form>
         </CardContent>
