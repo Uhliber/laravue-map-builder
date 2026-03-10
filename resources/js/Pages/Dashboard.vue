@@ -14,6 +14,9 @@ import { Head, Link, router, usePage } from "@inertiajs/vue3"
 import { Play, Plus, Eye, Pencil, Trash2 } from "lucide-vue-next"
 import { onMounted, ref, computed } from "vue"
 import { toast } from "vue-sonner"
+import Alert from "@/components/ui/alert/Alert.vue"
+import AlertTitle from "@/components/ui/alert/AlertTitle.vue"
+import AlertDescription from "@/components/ui/alert/AlertDescription.vue"
 
 const { props } = usePage()
 
@@ -80,7 +83,20 @@ onMounted(() => {
             </Button>
           </Link>
 
-          <Button v-else disabled> Map limit reached (5) </Button>
+          <div
+            v-else
+            class="grid w-full gap-4 sm:justify-between items-end sm:flex"
+          >
+            <div>
+              <Alert>
+                <AlertTitle class="text-destructive">Demo Mode</AlertTitle>
+                <AlertDescription>
+                  In Demo Mode, each account can save up to 5 maps only.
+                </AlertDescription>
+              </Alert>
+            </div>
+            <Button disabled> Map limit reached (5) </Button>
+          </div>
         </div>
 
         <!-- EMPTY STATE -->

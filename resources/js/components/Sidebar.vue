@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ChevronLeft } from "lucide-vue-next"
-import { computed } from "vue"
+import { computed, ref, watch } from "vue"
+import Alert from "./ui/alert/Alert.vue"
+import AlertTitle from "./ui/alert/AlertTitle.vue"
+import AlertDescription from "./ui/alert/AlertDescription.vue"
 
 const props = defineProps<{
   modelValue: boolean
@@ -12,6 +15,22 @@ const sidebarOpen = computed({
   get: () => props.modelValue,
   set: (val) => emit("update:modelValue", val),
 })
+
+const alertVisible = ref(false)
+
+watch(
+  () => sidebarOpen.value,
+  (open) => {
+    if (open) {
+      setTimeout(() => {
+        alertVisible.value = true
+      }, 300)
+    } else {
+      alertVisible.value = false
+    }
+  },
+  { immediate: true },
+)
 
 const toggleSidebar = () => {
   sidebarOpen.value = !sidebarOpen.value
@@ -50,6 +69,15 @@ const toggleSidebar = () => {
       >
         <slot name="header-label" />
       </span>
+    </div>
+    <div v-if="alertVisible" class="p-4 transition-opacity duration-200">
+      <Alert>
+        <AlertTitle class="text-destructive">Demo Mode</AlertTitle>
+        <AlertDescription>
+          Custom asset uploads are disabled in Demo Mode due to limited storage.
+          You may select from the available base maps and pointers.
+        </AlertDescription>
+      </Alert>
     </div>
 
     <!-- Menu -->
