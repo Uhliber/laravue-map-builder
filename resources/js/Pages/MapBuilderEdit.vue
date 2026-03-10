@@ -247,6 +247,16 @@ function updateMap() {
         toast.dismiss(toastId)
       }, 1800)
     },
+    onError: (page) => {
+      toast.error("Something went wrong.", {
+        description:
+          "An error occured while trying to update your map. Please try again later.",
+        class:
+          "border border-destructive/30 shadow-md dark:!border-destructive/40 dark:!bg-neutral-800",
+      })
+
+      console.error(page.errors)
+    },
   })
 }
 

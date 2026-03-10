@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { router } from "@inertiajs/vue3"
+import { router, usePage } from "@inertiajs/vue3"
 import { House } from "lucide-vue-next"
 
 import "vue-sonner/style.css"
 import { Toaster } from "vue-sonner"
+import { computed } from "vue"
+const page = usePage()
+const isAuthenticated = computed(() => !!page.props.auth?.user)
 
 const props = defineProps({
   hasUnsavedChanges: { type: Boolean, default: false },
@@ -14,7 +17,7 @@ function handleBackClick() {
   if (props.hasUnsavedChanges) {
     emit("confirm-navigation", () => router.visit("/dashboard"))
   } else {
-    router.visit("/dashboard")
+    isAuthenticated.value ? router.visit("/dashboard") : router.visit("/")
   }
 }
 </script>
