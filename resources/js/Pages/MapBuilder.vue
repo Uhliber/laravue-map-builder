@@ -20,7 +20,7 @@ import {
   PlusIcon,
   Trash,
 } from "lucide-vue-next"
-import { Head, router } from "@inertiajs/vue3"
+import { Head, router, usePage } from "@inertiajs/vue3"
 
 import { useAssetsStore } from "@/stores/assets"
 import { MapAsset, MapPointer } from "@/types"
@@ -32,6 +32,7 @@ import Spinner from "@/components/ui/spinner/Spinner.vue"
 
 const assetsStore = useAssetsStore()
 const { screenIsMobile } = useScreen()
+const page = usePage()
 
 const formData = reactive({
   base: null as null | {
@@ -44,7 +45,7 @@ const formData = reactive({
 
 const sidebarOpen = ref(true)
 const openSections = ref<string[]>([])
-
+const draftEnabled = ref(true)
 const activeBaseMap = ref<MapAsset | null>(null)
 const mapPointers = reactive<Record<string, MapPointer>>({})
 const isLoading = ref(false)
@@ -53,6 +54,8 @@ const mapContainer = ref<HTMLElement | null>(null)
 const selectedPointerId = ref<string | null>(null)
 
 const tooltipDialogOpen = ref(false)
+
+const isAuthenticated = computed(() => !!page.props.auth?.user)
 
 const selectedPointer = computed(() =>
   selectedPointerId.value ? mapPointers[selectedPointerId.value] : null,
@@ -126,13 +129,27 @@ watch(
   { deep: true },
 )
 
-watch(formData, () => debouncedSave(), { deep: true })
+watch(
+  formData,
+  () => {
+    if (!draftEnabled.value) return
+    debouncedSave()
+  },
+  { deep: true },
+)
 
 onMounted(() => {
   assetsStore.fetchAssets()
 
   nextTick(() => {
     loadFromLocalStorage()
+    const pendingSave = localStorage.getItem("map-builder-pending-save")
+
+    if (pendingSave && isAuthenticated.value) {
+      localStorage.removeItem("map-builder-pending-save")
+      submitMap()
+    }
+
     openSections.value = ["Base", "Pointers"]
   })
 })
@@ -254,14 +271,25 @@ function saveMap() {
     return
   }
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(formData))
+  if (!isAuthenticated.value) {
+    localStorage.setItem("map-builder-pending-save", "true")
+    router.visit("/login?redirect=/map-builder")
+    return
+  }
+
+  submitMap()
+}
+
+function submitMap() {
   isLoading.value = true
 
   router.post("/maps", formData, {
     preserveState: true,
     preserveScroll: true,
     onSuccess: (page) => {
+      draftEnabled.value = false
       // clear draft only after successful save
+      resetFormData()
       localStorage.removeItem(STORAGE_KEY)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mapId = (page.props as any)?.map_id
@@ -276,7 +304,22 @@ function saveMap() {
         toast.dismiss(toastId)
       }, 1800)
     },
+    onError: (page) => {
+      toast.error("Something went wrong.", {
+        description:
+          "An error occured while trying to save your map. Please try again later.",
+        class:
+          "border border-destructive/30 shadow-md dark:!border-destructive/40 dark:!bg-neutral-800",
+      })
+
+      console.error(page.errors)
+    },
   })
+}
+
+function resetFormData() {
+  formData.base = null
+  formData.pointers = []
 }
 
 function handlePreview() {

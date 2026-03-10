@@ -22,10 +22,14 @@ defineProps<{
   status?: string
 }>()
 
+const redirect =
+  new URLSearchParams(window.location.search).get("redirect") || undefined
+
 const form = useForm({
   email: "",
   password: "",
   remember: false,
+  redirect,
 })
 
 const submit = () => {
@@ -117,7 +121,7 @@ const submit = () => {
               <span class="text-muted-foreground">Don't have an account? </span>
               <Link
                 v-if="canResetPassword"
-                :href="route('register')"
+                :href="route('register', redirect ? { redirect } : {})"
                 class="text-primary hover:underline ml-1"
                 >Sign up</Link
               >

@@ -195,10 +195,10 @@ export const demoHighlightPointer: MapHighlightPointer = {
     name: "Ship",
     category: "landmarks",
     fileType: "svg",
-    title: "Welcome!",
+    title: "Build your map!",
     description:
       "Add an interactive map to help users explore and navigate your site. Click this popover to start building.",
-    link: "/login",
+    link: "/map-builder",
     x: 0,
     y: 0,
     trigger: "always",

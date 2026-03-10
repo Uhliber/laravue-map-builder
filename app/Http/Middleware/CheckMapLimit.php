@@ -11,14 +11,22 @@ class CheckMapLimit
 
     public function handle(Request $request, Closure $next)
     {
+        if (!$request->user()) {
+            return $next($request);
+        }
+
         $user = $request->user();
 
-        if ($user && $user->maps()->count() >= self::MAP_LIMIT) {
+        if ($user->maps()->count() >= self::MAP_LIMIT) {
             if ($request->header('X-Inertia')) {
-                return redirect()->route('dashboard')->with('error', 'Map limit reached (5)')->inertia();
+                return redirect()
+                    ->route('dashboard')
+                    ->with('error', 'Map limit reached (5)');
             }
 
-            return redirect()->route('dashboard')->with('error', 'Map limit reached (5)');
+            return redirect()
+                ->route('dashboard')
+                ->with('error', 'Map limit reached (5)');
         }
 
         return $next($request);

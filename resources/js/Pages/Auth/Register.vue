@@ -24,11 +24,15 @@ import Alert from "@/components/ui/alert/Alert.vue"
 import AlertTitle from "@/components/ui/alert/AlertTitle.vue"
 import AlertDescription from "@/components/ui/alert/AlertDescription.vue"
 
+const redirect =
+  new URLSearchParams(window.location.search).get("redirect") || undefined
+
 const form = useForm({
   name: "",
   email: "",
   password: "",
   password_confirmation: "",
+  redirect,
 })
 
 const submit = () => {
@@ -148,7 +152,7 @@ const submit = () => {
                 <FieldDescription class="text-center">
                   Already have an account?
                   <Link
-                    :href="route('login')"
+                    :href="route('login', redirect ? { redirect } : {})"
                     class="text-primary hover:underline ml-1"
                   >
                     Sign in
@@ -156,6 +160,7 @@ const submit = () => {
                 </FieldDescription>
               </FieldGroup>
             </FieldGroup>
+            <input type="hidden" name="redirect" :value="form.redirect" />
           </form>
         </CardContent>
       </Card>
